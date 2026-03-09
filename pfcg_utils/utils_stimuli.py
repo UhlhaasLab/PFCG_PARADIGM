@@ -145,9 +145,9 @@ class StimulusPresenter:
     
 
     def get_response_trigger_code(self, key_pressed):
-        if key_pressed == 'num_7':
+        if key_pressed == 65531:
             return 3
-        elif key_pressed == 'num_9': 
+        elif key_pressed == 65534: 
             return 4
         else: 
             return 5
