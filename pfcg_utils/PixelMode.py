@@ -11,7 +11,7 @@ def drawPixelModeTrigger(win, pixelValue):
         win=win,
         units='pix',
         start=topLeftCorner,
-        end=[topLeftCorner[0]+10, topLeftCorner[1]],
+        end=[topLeftCorner[0]+3, topLeftCorner[1]],
         interpolate=False,
         lineColor=pixelValue,
         colorSpace='rgb255',
@@ -30,3 +30,8 @@ def Trigger2RGB(trigger):
     #helper function determines pixel mode RGB 255 colour value based on 24-bit trigger (in decimal, base 10)  
     # return [red, green, blue]
     return [ trigger%256, (trigger>>8)%256, (trigger>>16)%256] 
+
+def print_trigger_info(device):
+    line = device.getVideoLine()
+    linevalue = RGB2Trigger((line[0][0], line[1][0], line[2][0]))
+    print(f"Video line value: {linevalue}")  # Debugging output to check the video line value

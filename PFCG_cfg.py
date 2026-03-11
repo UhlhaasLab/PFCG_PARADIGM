@@ -13,7 +13,7 @@ stimwd  = os.path.join(cwd_, 'stimuli')
 datawd  = os.path.join(cwd_, 'data')
 
 
-def preload_stimuli(win, stimuliwd, subjdir):
+def preload_stimuli(win, stimuliwd, subjdir, DE=True):
     # Grating image
     right_grating = [
         visual.ImageStim(win, image=os.path.join(stimuliwd, 'grating_right', f'right_1.png'), 
@@ -38,21 +38,36 @@ def preload_stimuli(win, stimuliwd, subjdir):
     # Text stimuli
     welcome_text = visual.TextStim(win, text='Welcome to the experiment! \n\nPress 8 when you are ready to start.', color='white', 
                                 height=1, pos=(0, 0), units='deg', wrapWidth=60)
+    welcome_text_DE = visual.TextStim(win, text='Willkommen zum Experiment! \n\nDrücken Sie 8, wenn Sie bereit sind zu beginnen.', color='white', 
+                                height=1, pos=(0, 0), units='deg', wrapWidth=60)
     
     welcome_practice = visual.TextStim(win, text='Welcome to the practice blocks of the experiment! \n\nPress 8 when you are ready to start.', color='white', 
                                 height=1, pos=(0, 0), units='deg', wrapWidth=60)
-
-    RS_text = visual.TextStim(win, text='We begin by taking a resting state EEG. We ask you to look at following fixation, moving as little as possible, for one minute. When you are ready, press the space bar to begin', color='white', 
+    welcome_practice_DE = visual.TextStim(win, text='Willkommen zu den Übungsblöcken des Experiments! \n\nDrücken Sie 8, wenn Sie bereit sind zu beginnen.', color='white',
+                                height=1, pos=(0, 0), units='deg', wrapWidth=60)
+    
+    RS_text = visual.TextStim(win, text='We begin by taking a resting state OPM. We ask you to look at following fixation, moving as little as possible, for one minute. When you are ready, press the space bar to begin', color='white', 
+                            height=1, pos=(0, 0), units='deg', wrapWidth=60)
+    RS_text_DE = visual.TextStim(win, text='Wir beginnen mit der Aufnahme eines Ruhe-OPMs. Wir bitten Sie, auf die folgende Fixation zu schauen und sich dabei so wenig wie möglich zu bewegen, für eine Minute. Wenn Sie bereit sind, drücken Sie die Leertaste, um zu beginnen.', color='white',
                             height=1, pos=(0, 0), units='deg', wrapWidth=60)
 
     begin_text = visual.TextStim(win, text='The task will now begin. \n\nPlease try to respond as accurately as possible. \n\nPress 8 when you are ready to start.', color='white', 
                                 height=1, pos=(0, 0), units='deg', wrapWidth=60)
+    begin_text_DE = visual.TextStim(win, text='Die Aufgabe beginnt jetzt. \n\nBitte versuchen Sie, so genau wie möglich zu antworten. \n\nDrücken Sie 8, wenn Sie bereit sind zu beginnen.', color='white', 
+                                height=1, pos=(0, 0), units='deg', wrapWidth=60)
+                                
     # instructions
     instructions_1 = visual.ImageStim(win, image=os.path.join(stimuliwd, f'instructions_1.png'), 
                         size=None)
     instructions_2 = visual.ImageStim(win, image=os.path.join(stimuliwd, f'instructions_2.png'), 
                         size=None)
     
+    if DE:
+        welcome_text = welcome_text_DE
+        welcome_practice = welcome_practice_DE
+        RS_text = RS_text_DE
+        begin_text = begin_text_DE
+        
     return {
         "right_grating": right_grating,
         "left_grating": left_grating,

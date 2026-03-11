@@ -1,6 +1,8 @@
 from psychopy import visual, core, event
 from pypixxlib import _libdpx as dp
 
+from pfcg_utils.PixelMode import RGB2Trigger
+
 BUTTON_CODES_ALL = {65527:'blue', 65533:'yellow', 65534:'red', 65531:'green', 65519:'white', 65535:'button release'}
 # 
 
@@ -35,8 +37,8 @@ def read_button_press(device, button_log):
                 if code in BUTTON_CODES_ALL:
                     button_name = BUTTON_CODES_ALL[code]
                     # # Only return green or red button presses
-                    # if button_name in ("red", "green"):
-                    return button_name, timestamp
+                    if button_name in ("red", "green","white"):
+                        return button_name, timestamp
     except Exception as e:
         print(f"✗ Error reading button: {e}")
     
@@ -56,7 +58,8 @@ def flush_button_buffer(device, button_log):
             if not n:
                 break
             device.din.readDinLog(button_log, n)
-        print("✓ Button buffer flushed")
+            
+        # print("✓ Button buffer flushed")
     except Exception as e:
         print(f"✗ Error flushing button buffer: {e}")
 

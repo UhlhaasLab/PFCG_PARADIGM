@@ -1,6 +1,7 @@
 from psychopy import visual, core, event, monitors, logging, sound, parallel
 import psychtoolbox as ptb
 import numpy as np
+from pfcg_utils.PixelMode import drawPixelModeTrigger, Trigger2RGB
 
 # Initialize port (use your correct address)
 TestingPort = True # True if on a laptop. False if in EEG-lab/Sudring -----------> ADAPT
@@ -62,14 +63,19 @@ class StimulusPresenter:
             core.wait(pulse_duration)
             self.port.setData(0)
             core.wait(pulse_duration)
+    
+    def send_trigger_opm(self, code):
+        """Sends a trigger code using pixel mode"""
+        drawPixelModeTrigger(self.win, Trigger2RGB(code))
+        # self.win.flip()
 
     def present_stimulus(self, stimulus, duration, trigger_code=None):
         """Present a single stimulus for a specified duration"""
         
         stimulus.draw()
-        self.win.flip()
         if trigger_code is not None:
-            self.send_trigger(trigger_code)
+            self.send_trigger_opm(trigger_code)
+        self.win.flip()
         core.wait(duration)
 
     def present_RS(self, resting_state, duration=60, trigger_code=7):
