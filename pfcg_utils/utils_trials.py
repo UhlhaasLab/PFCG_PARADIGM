@@ -1,10 +1,10 @@
 import os
-from psychopy import visual, core, event, monitors, logging, sound
-import psychtoolbox as ptb
+# from psychopy import visual, core, event, monitors, logging, sound
+# import psychtoolbox as ptb
 import serial
 import numpy as np
 import csv
-import random
+# import random
 import pandas as pd
 
 def get_block_trialtypes(block_number: int, participant_id: str, data_dir: str = "data"):
@@ -41,7 +41,6 @@ def get_block_cuetypes(block_number: int, participant_id: str, data_dir: str = "
                 raise ValueError(f"Malformed row in {csv_path}: {row}") from e
         
         return cuetypes
-
 
 def shuffle_blocks(participant_id, save_dir):
     """

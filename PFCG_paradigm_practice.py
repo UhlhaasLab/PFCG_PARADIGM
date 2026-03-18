@@ -126,7 +126,7 @@ for group_idx in range(num_groups):
         stimuli['welcome_practice'].draw()
         win.flip()
         button_name = None
-        while button_name is not 'green':  # Wait until a button is pressed
+        while button_name != 'green':  # Wait until a button is pressed
             button_name, _ = read_button_press(device, myLog)
         # button_name = stopButtons(BUTTON_CODES.keys())  # Wait for either start or exit button press
         # if button_name == exitButton:
@@ -145,7 +145,7 @@ for group_idx in range(num_groups):
         #     # core.quit()
         #     cleanup_and_exit(device, win)
         button_name = None
-        while button_name is not 'green':  # Wait until a button is pressed
+        while button_name !=  'green':  # Wait until a button is pressed
             button_name, _ = read_button_press(device, myLog)
         rt_clock.reset()
         event.clearEvents()
@@ -155,7 +155,7 @@ for group_idx in range(num_groups):
         win.flip()
         # core.wait(0.5)
         button_name = None
-        while button_name is not 'green':  # Wait until a button is pressed
+        while button_name != 'green':  # Wait until a button is pressed
             button_name, _ = read_button_press(device, myLog)
         # if button_name == exitButton:
         #     # core.quit()
@@ -174,7 +174,7 @@ for group_idx in range(num_groups):
         win.flip()
         # core.wait(0.5)
         button_name = None
-        while button_name is not 'green':  # Wait until a button is pressed
+        while button_name != 'green':  # Wait until a button is pressed
             button_name, _ = read_button_press(device, myLog)
         # if button_name == exitButton:
         #     # core.quit()

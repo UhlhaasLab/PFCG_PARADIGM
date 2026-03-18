@@ -1,31 +1,49 @@
-# everywhere with "ADAPT" needs to be changed
-# adapt keys/buttons etc to OPM: correct_key defined here and in utils_trials
-
 import os
-# import serial
 import csv
 import numpy as np
+import argparse
 from datetime import datetime
-import random
-from psychopy import logging, prefs, core, visual, event, monitors
+from psychopy import core, visual, event, monitors
 
 from PFCG_cfg import stimwd, datawd, preload_stimuli
 from pfcg_utils.utils_bottons import flush_button_buffer,cleanup_and_exit, read_button_press
-from pfcg_utils.utils_stimuli import StimulusPresenter, sec_to_fr
-from pfcg_utils.utils_trials import get_block_trialtypes, get_block_cuetypes
-# from pfcg_utils.buttons import collect_response, flush_buttons
-from pfcg_utils.PixelMode import drawPixelModeTrigger, RGB2Trigger, Trigger2RGB, print_trigger_info, GB2trigger, Trigger2GB
+from pfcg_utils.utils_stimuli import StimulusPresenter
+from pfcg_utils.utils_trials import get_block_trialtypes, get_block_cuetypes, shuffle_blocks
+from pfcg_utils.PixelMode import drawPixelModeTrigger, print_trigger_info, Trigger2GB
 from pypixxlib.datapixx import DATAPixx3
 
+
+
+######### Set directories## ####################################################
+cwd_ = os.getcwd()
+datawd = os.path.join(cwd_, 'data')
+################################################################################
+
+# ==================== SET PARTICIPANT ID ==================== #
+date_str = datetime.now().strftime("%Y-%m-%d")
+# participant_id = 'Erfan'    # -----------------------------------------------> ADAPT
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--participant", type=str, required=True)
+args = parser.parse_args()
+
+participant_id = args.participant
+print("Running participant:", participant_id)
+participant_dir = os.path.join(datawd, participant_id) 
+
+if not os.path.exists(participant_dir):
+    os.makedirs(participant_dir)
+    
+trials_path = os.path.join(participant_dir, f"{participant_id}_trials.csv")
+
+if not os.path.exists(trials_path):
+        shuffle_blocks(participant_id, datawd)
 
 # Working codes in Lab maestro Simulator
 BUTTON_CODES = {65527:'blue', 65533:'yellow', 65534:'red', 65531:'green', 65519:'white'}
 # , 65535:'button release'
-exitButton  = 65519 # white button code in Lab Maestro Simulator
-# greenButton = 65531
 
 #BUTTON_CODES = { 65528: 'blue', 65522: 'yellow', 65521: 'red', 65524: 'green', 65520: 'button release' }
-# exitButton  = ? # white button code in OPM lab 
 
 device      = DATAPixx3()
 
@@ -48,7 +66,7 @@ TestingPort = True      # True if on a laptop. False if in EEG-lab/Sudring -----
 if TestingPort:
     viewing_distance_cm = 57.3    
     monitor_width_cm    = 52.7
-    monitor_size_pix    = [1920,720]
+    monitor_size_pix    = [1280,720]
     monitor_name        = "testMonitor"
     
 else:   #----------------------> # change OPM/EEG lab port settings
@@ -75,17 +93,8 @@ monitor.setSizePix(monitor_size_pix)
 monitor.save()
 
 # win = visual.Window(monitor=monitor, fullscr=True, color=("#AAAAAA"), units="deg") # Create the window with aforementioned monitor
-win = visual.Window( monitor=monitor_name, color=("#AAAAAA"), units="pix",screen=0, size = [1920, 720], allowGUI=False, fullscr=True) # Create the window with aforementioned monitor
+win = visual.Window( monitor=monitor_name, color=("#AAAAAA"), units="pix",screen=0, size = [1280, 720], allowGUI=False, fullscr=True) # Create the window with aforementioned monitor
 win.mouseVisible = False # Hide mouse
-
-# ==================== SET PARTICIPANT ID ==================== #
-date_str = datetime.now().strftime("%Y-%m-%d")
-#participant_id = input("Enter participant ID: ")
-participant_id = 'Erfan'    # -----------------------------------------------> ADAPT
-participant_dir = os.path.join(datawd, participant_id) 
-
-if not os.path.exists(participant_dir):
-    os.makedirs(participant_dir)
 
 # ==================== IMPORT STIMULI ==================== #
 stimuli = preload_stimuli(win, stimwd, participant_dir) # for modifying relevant stimuli, see utils_stimuli
@@ -135,21 +144,21 @@ for group_idx in range(num_groups):
         stimuli['welcome_text'].draw()
         win.flip()
         button_name = None
-        while button_name is not 'green':  # Wait until a button is pressed
+        while button_name != 'green':  # Wait until a button is pressed
             button_name, _ = read_button_press(device, myLog)
         # button_name = stopButtons(BUTTON_CODES.keys())  # Wait for either start or exit button press
         # # print(f"Button pressed: {button_name}")
         # if button_name == exitButton:
         #     # core.quit()
         #     cleanup_and_exit(device, win)
-
         rt_clock.reset()
         event.clearEvents()
         flush_button_buffer(device, myLog)  # Clear any old button presses from the buffer
 
         stimuli['begin_text'].draw()
         win.flip()
-        while button_name is not 'green':  # Wait until a button is pressed
+        button_name = None
+        while button_name != 'green':  # Wait until a button is pressed
             button_name, _ = read_button_press(device, myLog)
         # button_name = stopButtons(BUTTON_CODES.keys())  # Wait for either start or exit button press
         # if button_name == exitButton:
@@ -173,8 +182,7 @@ for group_idx in range(num_groups):
     stimuli['Fix_Dot'].draw()
     win.flip()
     core.wait(2.5)
-    print_trigger_info(device) # Debugging output to check the video line value
-
+  
     # Show cue_cong or cue_incg for 500ms
     cue_stimulus = presenter.get_cue_stimulus(stimuli, cueid)
     cue_trigger_code = presenter.get_cue_trigger_code(cueid)
@@ -187,8 +195,6 @@ for group_idx in range(num_groups):
     jitter = round(jitter, 2)
  
     post_cue_jitter = presenter.present_fixation(stimuli['Fix_Dot'], duration=jitter)
-
-    print_trigger_info(device) # Debugging output to check the video line value
 
     # Present 5 trials of gratings
     # start_idx and end_idx calling the appropriate row in the data (AKA conditions) file
@@ -255,7 +261,7 @@ for group_idx in range(num_groups):
         stimuli['Fix_Dot'].draw()
         win.callOnFlip(timer.reset)  # Mark fixation onset time
         win.flip()
-        print_trigger_info(device) # Debugging output to check the video line value
+        # print_trigger_info(device) # Debugging output to check the video line value
         
         # timer = core.Clock()  # Reset timer for fixation period
         

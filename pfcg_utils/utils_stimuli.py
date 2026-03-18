@@ -82,7 +82,7 @@ class StimulusPresenter:
         """Present fixation dot for resting state measurement"""
         self.present_stimulus(resting_state, duration, trigger_code)
 
-    def present_fixation(self, fixation, duration=None, trigger_code=9):
+    def present_fixation(self, fixation, duration=None, trigger_code=None):
         """Present fixation dot for specified duration"""
         self.present_stimulus(fixation, duration, trigger_code)
         return duration
