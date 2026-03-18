@@ -10,7 +10,7 @@ import random
 from psychopy import logging, prefs, core, visual, event, monitors
 
 from PFCG_cfg import stimwd, datawd, preload_stimuli
-from pfcg_utils.utils_bottons import flush_button_buffer,cleanup_and_exit, read_button_press, stopButtons
+from pfcg_utils.utils_bottons import flush_button_buffer,cleanup_and_exit, read_button_press
 from pfcg_utils.utils_stimuli import StimulusPresenter, sec_to_fr
 from pfcg_utils.utils_trials import get_block_trialtypes, get_block_cuetypes
 # from pfcg_utils.buttons import collect_response, flush_buttons
@@ -22,6 +22,7 @@ from pypixxlib.datapixx import DATAPixx3
 BUTTON_CODES = {65527:'blue', 65533:'yellow', 65534:'red', 65531:'green', 65519:'white'}
 # , 65535:'button release'
 exitButton  = 65519 # white button code in Lab Maestro Simulator
+# greenButton = 65531
 
 #BUTTON_CODES = { 65528: 'blue', 65522: 'yellow', 65521: 'red', 65524: 'green', 65520: 'button release' }
 # exitButton  = ? # white button code in OPM lab 
@@ -90,9 +91,9 @@ if not os.path.exists(participant_dir):
 stimuli = preload_stimuli(win, stimwd, participant_dir) # for modifying relevant stimuli, see utils_stimuli
 
 rt_clock = core.Clock()
-rt_clock2 = core.Clock()
-onsettime = rt_clock2.getTime()
-presenter = StimulusPresenter(window=win, exptimer=rt_clock2, triggers=True)
+# rt_clock2 = core.Clock()
+# onsettime = rt_clock2.getTime()
+presenter = StimulusPresenter(window=win, exptimer=rt_clock, triggers=True)
 
 # ==================== EXPORT LOG FILE ==================== #
 # Create file path for CSV log
@@ -105,7 +106,7 @@ if not os.path.exists(datafile_path):
         writer.writerow(['block', 'trial', 'trialtype', 'trialtype_string', 'cuetype', 'cuetype_string', 'correct_key', 'key_pressed','is_resp_corr', 'reaction_time', 'reaction_time_vpixx'])  # Add reaction_time_vpixx to headers
 
 # ==================== EXPERIMENT ==================== #
-symbol_offset = 1.5 # sets degrees from the centre --------------------------> is this OK also for the OPM lab
+# symbol_offset = 1.5 # sets degrees from the centre --------------------------> is this OK also for the OPM lab
 
 BLOCK = 1   # ------------------------------------------------> ADAPT
 
@@ -133,11 +134,14 @@ for group_idx in range(num_groups):
 
         stimuli['welcome_text'].draw()
         win.flip()
-        button_name = stopButtons(BUTTON_CODES.keys())  # Wait for either start or exit button press
-        # print(f"Button pressed: {button_name}")
-        if button_name == exitButton:
-            # core.quit()
-            cleanup_and_exit(device, win)
+        button_name = None
+        while button_name is not 'green':  # Wait until a button is pressed
+            button_name, _ = read_button_press(device, myLog)
+        # button_name = stopButtons(BUTTON_CODES.keys())  # Wait for either start or exit button press
+        # # print(f"Button pressed: {button_name}")
+        # if button_name == exitButton:
+        #     # core.quit()
+        #     cleanup_and_exit(device, win)
 
         rt_clock.reset()
         event.clearEvents()
@@ -145,13 +149,12 @@ for group_idx in range(num_groups):
 
         stimuli['begin_text'].draw()
         win.flip()
-
-        core.wait(0.5)  # Small delay to ensure buffer is cleared before next block 
-
-        button_name = stopButtons(BUTTON_CODES.keys())  # Wait for either start or exit button press
-        if button_name == exitButton:
-            # core.quit()
-            cleanup_and_exit(device, win)
+        while button_name is not 'green':  # Wait until a button is pressed
+            button_name, _ = read_button_press(device, myLog)
+        # button_name = stopButtons(BUTTON_CODES.keys())  # Wait for either start or exit button press
+        # if button_name == exitButton:
+        #     # core.quit()
+        #     cleanup_and_exit(device, win)
         rt_clock.reset()
         event.clearEvents()
         flush_button_buffer(device, myLog)  # Clear any old button presses from the buffer

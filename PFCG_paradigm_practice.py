@@ -1,32 +1,82 @@
-# Practice version of PFCG paradigm - no CSV output
+# everywhere with "ADAPT" needs to be changed
+# adapt keys/buttons etc to OPM: correct_key defined here and in utils_trials
+
 import os
-import serial
+# import serial
+import csv
 import numpy as np
 from datetime import datetime
+import random
 from psychopy import logging, prefs, core, visual, event, monitors
+
 from PFCG_cfg import stimwd, datawd, preload_stimuli
+from pfcg_utils.utils_bottons import flush_button_buffer,cleanup_and_exit, read_button_press, stopButtons
 from pfcg_utils.utils_stimuli import StimulusPresenter, sec_to_fr
 from pfcg_utils.utils_trials import get_block_trialtypes, get_block_cuetypes
-import random
+# from pfcg_utils.buttons import collect_response, flush_buttons
+from pfcg_utils.PixelMode import drawPixelModeTrigger, RGB2Trigger, Trigger2RGB, print_trigger_info, GB2trigger, Trigger2GB
+from pypixxlib.datapixx import DATAPixx3
 
-# Change the size depending on the monitor in question, also monitor name
-viewing_distance_cm = 90    
-screen_number       = 1
-monitor_width_cm    = 53.7
-monitor_size_pix    = [1920, 1200]
 
-#Set monitor
-monitor = monitors.Monitor("Sudring")
+# Working codes in Lab maestro Simulator
+BUTTON_CODES = {65527:'blue', 65533:'yellow', 65534:'red', 65531:'green', 65519:'white'}
+# , 65535:'button release'
+exitButton  = 65519 # white button code in Lab Maestro Simulator
+# greenButton = 65531
+
+#BUTTON_CODES = { 65528: 'blue', 65522: 'yellow', 65521: 'red', 65524: 'green', 65520: 'button release' }
+# exitButton  = ? # white button code in OPM lab 
+
+device      = DATAPixx3()
+
+# enable pixel mode once
+device.dout.enablePixelModeGB()
+device.updateRegisterCache() 
+
+# Initialize button
+myLog = device.din.setDinLog(12e6, 1000)
+device.din.startDinLog()
+device.updateRegisterCache()
+
+event.clearEvents() 
+flush_button_buffer(device, myLog)
+
+
+# ==================== MONITOR ==================== #
+TestingPort = True      # True if on a laptop. False if in EEG-lab/Sudring ------> ADAPT (also in utils_stimuly.py)
+
+if TestingPort:
+    viewing_distance_cm = 57.3    
+    monitor_width_cm    = 52.7
+    monitor_size_pix    = [1920,720]
+    monitor_name        = "testMonitor"
+    
+else:   #----------------------> # change OPM/EEG lab port settings
+    viewing_distance_cm = 90    
+    monitor_width_cm    = 53.7
+    monitor_size_pix    = [1920, 1200]
+    monitor_name        = "OPM-lab"
+    
+""" change the else loop if in EEG Lab Suedring to:
+else:
+    # Lab Settings (Sudring)
+    # Change the size depending on the monitor in question
+    viewing_distance_cm = 90    
+    monitor_width_cm    = 53.7
+    monitor_size_pix    = [1920, 1200]
+    monitor_name        = "Sudring"
+"""
+
+# Apply Monitor Settings
+monitor = monitors.Monitor(monitor_name)
 monitor.setWidth(monitor_width_cm)
 monitor.setDistance(viewing_distance_cm)
 monitor.setSizePix(monitor_size_pix)
 monitor.save()
 
-# Create the window with aforementioned monitor
-win = visual.Window(monitor="testMonitor", fullscr=True, color=("#AAAAAA"), units="deg")
-
-# Hide the mouse!
-win.mouseVisible = False
+# win = visual.Window(monitor=monitor, fullscr=True, color=("#AAAAAA"), units="deg") # Create the window with aforementioned monitor
+win = visual.Window( monitor=monitor_name, color=("#AAAAAA"), units="pix",screen=0, size = [1920, 720], allowGUI=False, fullscr=True) # Create the window with aforementioned monitor
+win.mouseVisible = False # Hide mouse
 
 # Set participant ID for loading stimuli
 participant_id = 'Practice'
@@ -36,9 +86,9 @@ participant_dir = os.path.join(datawd, participant_id)
 stimuli = preload_stimuli(win, stimwd, participant_dir)
 
 rt_clock = core.Clock()
-rt_clock2 = core.Clock()
-onsettime = rt_clock2.getTime()
-presenter = StimulusPresenter(window=win, exptimer=rt_clock2, triggers=True)
+# rt_clock2 = core.Clock()
+# onsettime = rt_clock2.getTime()
+presenter = StimulusPresenter(window=win, exptimer=rt_clock, triggers=True)
 
 # CHECK IN EEG LAB - are these different clocks needed?
 # rt_clock = core.Clock()
@@ -72,43 +122,78 @@ for group_idx in range(num_groups):
     cueid = cuetype[start_idx]
     
     if group_idx == 0:
+
         stimuli['welcome_practice'].draw()
         win.flip()
-        keys = event.waitKeys(keyList=["num_8", "escape"])
-        if "escape" in keys:
-            core.quit()
+        button_name = None
+        while button_name is not 'green':  # Wait until a button is pressed
+            button_name, _ = read_button_press(device, myLog)
+        # button_name = stopButtons(BUTTON_CODES.keys())  # Wait for either start or exit button press
+        # if button_name == exitButton:
+        #     # core.quit()
+        #     cleanup_and_exit(device, win)      
         rt_clock.reset()
         event.clearEvents()
-        
+        flush_button_buffer(device, myLog)  # Clear any old button presses from the buffer
+  
         # Practice instructions
         stimuli['instructions_1'].draw()
         win.flip()
-        keys = event.waitKeys(keyList=["num_8", "escape"])
-        if "escape" in keys:
-            core.quit()
+        # core.wait(0.5)
+        # button_name = stopButtons(BUTTON_CODES.keys())  # Wait for either start or exit button press
+        # if button_name == exitButton:
+        #     # core.quit()
+        #     cleanup_and_exit(device, win)
+        button_name = None
+        while button_name is not 'green':  # Wait until a button is pressed
+            button_name, _ = read_button_press(device, myLog)
         rt_clock.reset()
         event.clearEvents()
-        
+        flush_button_buffer(device, myLog)  # Clear any old button presses from the buffer
+
         stimuli['instructions_2'].draw()
         win.flip()
-        keys = event.waitKeys(keyList=["num_8", "escape"])
-        if "escape" in keys:
-            core.quit()
+        # core.wait(0.5)
+        button_name = None
+        while button_name is not 'green':  # Wait until a button is pressed
+            button_name, _ = read_button_press(device, myLog)
+        # if button_name == exitButton:
+        #     # core.quit()
+        #     cleanup_and_exit(device, win)
         rt_clock.reset()
         event.clearEvents()
+        flush_button_buffer(device, myLog)  # Clear any old button presses from the buffer
+
+        # keys = event.waitKeys(keyList=["num_8", "escape"])
+        # if "escape" in keys:
+        #     core.quit()
+        # rt_clock.reset()
+        # event.clearEvents()
         
         stimuli['begin_text'].draw()
         win.flip()
-        keys = event.waitKeys(keyList=["num_8", "escape"])
-        if "escape" in keys:
-            core.quit()
+        # core.wait(0.5)
+        button_name = None
+        while button_name is not 'green':  # Wait until a button is pressed
+            button_name, _ = read_button_press(device, myLog)
+        # if button_name == exitButton:
+        #     # core.quit()
+        #     cleanup_and_exit(device, win)
         rt_clock.reset()
         event.clearEvents()
+        flush_button_buffer(device, myLog)  # Clear any old button presses from the buffer
+
+        # keys = event.waitKeys(keyList=["num_8", "escape"])
+        # if "escape" in keys:
+        #     core.quit()
+        # rt_clock.reset()
+        # event.clearEvents()
     # Task begins here for each mini-block
     
     # Show baseline cue for 500ms
-    win.callOnFlip(presenter.send_trigger, 11)
+    # win.callOnFlip(presenter.send_trigger, 11)
     stimuli['cue_baseline'].draw()
+    drawPixelModeTrigger(win, Trigger2GB(10)) 
     win.flip()
     core.wait(0.5)
     
@@ -143,50 +228,77 @@ for group_idx in range(num_groups):
         jitter = round(jitter, 2)
 
         # Send trigger at Flip
-        if target_trigger_code is not None:
-            win.callOnFlip(presenter.send_trigger, target_trigger_code)
         arrow_stimulus.draw()
-        win.flip()
+        # win.flip()
+        if target_trigger_code is not None:
+            drawPixelModeTrigger(win, Trigger2GB(target_trigger_code))  # send trigger using pixel mode
+
 
         timer = core.Clock()
-
+        flip_marks = {}
+        device.updateRegisterCache()
+        win.callOnFlip(lambda: flip_marks.setdefault('t0_dev', device.getTime()))
+        win.callOnFlip(timer.reset)
+        win.flip()
+        print_trigger_info(device) # Debugging output to check the video line value and timing of trigger relative to stimulus onset
+        
+        
         # Initialize response variables
+        t_0_v = flip_marks['t0_dev']
         key_pressed = None
         reaction_time = None
+        reaction_time_vpixx = None
         arrow_duration = 0.5
         response_deadline = arrow_duration + jitter
 
-        # Monitor for responses during target presentation
+        flush_button_buffer(device, myLog)  # Clear any old button presses from the buffer
+   
+    
+        # Monitor for responses during target presentation (0.5s)
         while timer.getTime() < arrow_duration:
-            keys = event.getKeys(keyList=['num_7', 'num_9', 'escape'])
-            if keys:
-                key_pressed = keys[0]
+            # keys = event.getKeys(keyList=['num_7', 'num_9', 'escape'])
+
+            button_name, timestamp = read_button_press(device, myLog)  # Check for button presses
+            key_pressed = button_name
+            if key_pressed:
+               
                 reaction_time = timer.getTime()
+                reaction_time_vpixx = timestamp - t_0_v  # Calculate reaction time based on VPixx timestamp
+
                 response_trigger_code = presenter.get_response_trigger_code(key_pressed)
-                presenter.send_trigger(response_trigger_code)
-                if key_pressed == 'escape':
-                    core.quit()
+                presenter.send_trigger_opm(response_trigger_code)  # send response trigger using pixel mode
+                presenter.win.flip()  # Ensure the trigger is sent immediately
+
+                if key_pressed == "white":  # exit button
+                    cleanup_and_exit(device, win)
                 break
-
+                
         # Show fixation
-        #win.callOnFlip(presenter.send_trigger, 9)    # johanna changed this
+        #win.callOnFlip(presenter.send_trigger, 9)    # johanna commented this out on request of tineke
         stimuli['Fix_Dot'].draw()
+        win.callOnFlip(timer.reset)  # Mark fixation onset time
         win.flip()
-
-        timer = core.Clock()
-
+        print_trigger_info(device) # Debugging output to check the video line value
+        
+        # timer = core.Clock()  # Reset timer for fixation period
+        
         # Continue monitoring during fixation if no response yet
         if not key_pressed:
             while timer.getTime() < jitter:
-                keys = event.getKeys(keyList=['num_7', 'num_9', 'escape'])
-                if keys:
-                    key_pressed = keys[0]
+                # flush_button_buffer(device, myLog)  # Clear any old button presses from the buffer
+                button_name, timestamp = read_button_press(device, myLog)  # Check for button presses
+                if button_name:
+                    key_pressed = button_name
                     # RT during fixation = 0.5 + time into fixation
                     reaction_time = arrow_duration + timer.getTime()
+                    reaction_time_vpixx = timestamp - t_0_v  # Calculate reaction time based on VPixx timestamp
                     response_trigger_code = presenter.get_response_trigger_code(key_pressed)
-                    presenter.send_trigger(response_trigger_code)
-                    if key_pressed == 'escape':
-                        core.quit()
+                    presenter.send_trigger_opm(response_trigger_code)
+                    presenter.win.flip()  # Ensure the trigger is sent immediately
+
+                    if key_pressed == 'white':  # exit button
+                        # core.quit()
+                        cleanup_and_exit(device, win)
                     break
             # Wait for any remaining fixation time
             remaining_time = jitter - timer.getTime()
@@ -202,16 +314,16 @@ for group_idx in range(num_groups):
         trial_num = trial_idx + 1  # or use your CSV's trial column if loaded
         if trialid == 0:
             trialtype_string = 'right_cong'
-            correct_key = 'num_9'
+            correct_key = 'red'
         elif trialid == 1:
             trialtype_string = 'left_cong'
-            correct_key = 'num_7'
+            correct_key = 'green'
         elif trialid == 2:
             trialtype_string = 'right_incg'
-            correct_key = 'num_7'
+            correct_key = 'green'
         elif trialid == 3:
             trialtype_string = 'left_incg'
-            correct_key = 'num_9'
+            correct_key = 'red'
         else:
             trialtype_string = 'unknown'
             correct_key = 'unknown'
@@ -226,8 +338,7 @@ for group_idx in range(num_groups):
             correct_responses += 1
         else:
             is_resp_corr = 0
-        total_trials += 1        
-        
+        total_trials += 1
         
         """
         # Johanna: the following lines were slightely different than in the PFCG_paradigm.py, so i commented them out and copied the same lines from the paradigm.py into here.
