@@ -1,6 +1,7 @@
 @echo off
 
 set "PARTICIPANT=%~1"
+set "BLOCK=%~2"
 set "LOGFILE=%PARTICIPANT%_log.txt"
 set "LOGDIR=logs"
 if not exist "%LOGDIR%" mkdir "%LOGDIR%"
@@ -12,14 +13,14 @@ if "%PARTICIPANT%"=="" (
     exit /b
 )
 
-@REM "C:\Users\barada01\AppData\Local\Programs\PsychoPy\python.exe" "C:\Users\barada01\Documents\paradigm\BI exp\BI-task-switch\psychopy-PFC\PFCG_PARADIGM\PFCG_paradigm_practice.py" > "%LOGFILE%" 2>&1
+"C:\Users\barada01\AppData\Local\Programs\PsychoPy\python.exe" "C:\Users\barada01\Documents\paradigm\BI exp\BI-task-switch\psychopy-PFC\PFCG_PARADIGM\PFCG_paradigm_practice.py" > "%LOGFILE%" 2>&1
 
-@REM if errorlevel 1 (
-@REM     echo Experiment 1 failed. Aborting.
-@REM     pause
-@REM     exit /b
-@REM )
+if errorlevel 1 (
+    echo Experiment 1 failed. Aborting.
+    pause
+    exit /b
+)
 
-"C:\Users\barada01\AppData\Local\Programs\PsychoPy\python.exe" "C:\Users\barada01\Documents\paradigm\BI exp\BI-task-switch\psychopy-PFC\PFCG_PARADIGM\PFCG_paradigm.py" --participant "%PARTICIPANT%" > "%LOGFILE%" 2>&1
+"C:\Users\barada01\AppData\Local\Programs\PsychoPy\python.exe" "C:\Users\barada01\Documents\paradigm\BI exp\BI-task-switch\psychopy-PFC\PFCG_PARADIGM\PFCG_paradigm.py" --participant "%PARTICIPANT%" --block "%BLOCK%" > "%LOGFILE%" 2>&1
 
-pause
+pause 

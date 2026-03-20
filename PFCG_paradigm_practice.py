@@ -18,15 +18,6 @@ from pfcg_utils.PixelMode import drawPixelModeTrigger, RGB2Trigger, Trigger2RGB,
 from pypixxlib.datapixx import DATAPixx3
 
 
-# Working codes in Lab maestro Simulator
-BUTTON_CODES = {65527:'blue', 65533:'yellow', 65534:'red', 65531:'green', 65519:'white'}
-# , 65535:'button release'
-exitButton  = 65519 # white button code in Lab Maestro Simulator
-# greenButton = 65531
-
-#BUTTON_CODES = { 65528: 'blue', 65522: 'yellow', 65521: 'red', 65524: 'green', 65520: 'button release' }
-# exitButton  = ? # white button code in OPM lab 
-
 device      = DATAPixx3()
 
 # enable pixel mode once
@@ -48,7 +39,7 @@ TestingPort = True      # True if on a laptop. False if in EEG-lab/Sudring -----
 if TestingPort:
     viewing_distance_cm = 57.3    
     monitor_width_cm    = 52.7
-    monitor_size_pix    = [1920,720]
+    monitor_size_pix    = [1280,720]
     monitor_name        = "testMonitor"
     
 else:   #----------------------> # change OPM/EEG lab port settings
@@ -74,7 +65,6 @@ monitor.setDistance(viewing_distance_cm)
 monitor.setSizePix(monitor_size_pix)
 monitor.save()
 
-# win = visual.Window(monitor=monitor, fullscr=True, color=("#AAAAAA"), units="deg") # Create the window with aforementioned monitor
 win = visual.Window( monitor=monitor_name, color=("#AAAAAA"), units="pix",screen=0, size = [1920, 720], allowGUI=False, fullscr=True) # Create the window with aforementioned monitor
 win.mouseVisible = False # Hide mouse
 
@@ -86,18 +76,10 @@ participant_dir = os.path.join(datawd, participant_id)
 stimuli = preload_stimuli(win, stimwd, participant_dir)
 
 rt_clock = core.Clock()
-# rt_clock2 = core.Clock()
-# onsettime = rt_clock2.getTime()
 presenter = StimulusPresenter(window=win, exptimer=rt_clock, triggers=True)
 
-# CHECK IN EEG LAB - are these different clocks needed?
-# rt_clock = core.Clock()
-# rt_clock2 = core.Clock()
-# onsettime = rt_clock2.getTime()
-# presenter = StimulusPresenter(window=win, exptimer=rt_clock2, triggers=True)
-
 ## Defining Variables                   
-symbol_offset = 1.5
+# symbol_offset = 1.5
 
 ## Setting up the practice
 BLOCK = 0               
@@ -126,12 +108,8 @@ for group_idx in range(num_groups):
         stimuli['welcome_practice'].draw()
         win.flip()
         button_name = None
-        while button_name != 'green':  # Wait until a button is pressed
+        while button_name != 'white':  # Wait until a button is pressed
             button_name, _ = read_button_press(device, myLog)
-        # button_name = stopButtons(BUTTON_CODES.keys())  # Wait for either start or exit button press
-        # if button_name == exitButton:
-        #     # core.quit()
-        #     cleanup_and_exit(device, win)      
         rt_clock.reset()
         event.clearEvents()
         flush_button_buffer(device, myLog)  # Clear any old button presses from the buffer
@@ -139,13 +117,8 @@ for group_idx in range(num_groups):
         # Practice instructions
         stimuli['instructions_1'].draw()
         win.flip()
-        # core.wait(0.5)
-        # button_name = stopButtons(BUTTON_CODES.keys())  # Wait for either start or exit button press
-        # if button_name == exitButton:
-        #     # core.quit()
-        #     cleanup_and_exit(device, win)
         button_name = None
-        while button_name !=  'green':  # Wait until a button is pressed
+        while button_name !=  'white':  # Wait until a button is pressed
             button_name, _ = read_button_press(device, myLog)
         rt_clock.reset()
         event.clearEvents()
@@ -153,45 +126,25 @@ for group_idx in range(num_groups):
 
         stimuli['instructions_2'].draw()
         win.flip()
-        # core.wait(0.5)
         button_name = None
-        while button_name != 'green':  # Wait until a button is pressed
+        while button_name != 'white':  # Wait until a button is pressed
             button_name, _ = read_button_press(device, myLog)
-        # if button_name == exitButton:
-        #     # core.quit()
-        #     cleanup_and_exit(device, win)
         rt_clock.reset()
         event.clearEvents()
         flush_button_buffer(device, myLog)  # Clear any old button presses from the buffer
-
-        # keys = event.waitKeys(keyList=["num_8", "escape"])
-        # if "escape" in keys:
-        #     core.quit()
-        # rt_clock.reset()
-        # event.clearEvents()
         
         stimuli['begin_text'].draw()
         win.flip()
-        # core.wait(0.5)
         button_name = None
-        while button_name != 'green':  # Wait until a button is pressed
+        while button_name != 'white':  # Wait until a button is pressed
             button_name, _ = read_button_press(device, myLog)
-        # if button_name == exitButton:
-        #     # core.quit()
-        #     cleanup_and_exit(device, win)
         rt_clock.reset()
         event.clearEvents()
         flush_button_buffer(device, myLog)  # Clear any old button presses from the buffer
 
-        # keys = event.waitKeys(keyList=["num_8", "escape"])
-        # if "escape" in keys:
-        #     core.quit()
-        # rt_clock.reset()
-        # event.clearEvents()
     # Task begins here for each mini-block
     
     # Show baseline cue for 500ms
-    # win.callOnFlip(presenter.send_trigger, 11)
     stimuli['cue_baseline'].draw()
     drawPixelModeTrigger(win, Trigger2GB(10)) 
     win.flip()
@@ -199,7 +152,7 @@ for group_idx in range(num_groups):
     
     # Show fixation for 2500ms
     stimuli['Fix_Dot'].draw()
-    win.flip()
+    win.flip()                           
     core.wait(2.5)
 
     # Show cue_cong or cue_incg for 500ms
@@ -240,8 +193,6 @@ for group_idx in range(num_groups):
         win.callOnFlip(lambda: flip_marks.setdefault('t0_dev', device.getTime()))
         win.callOnFlip(timer.reset)
         win.flip()
-        print_trigger_info(device) # Debugging output to check the video line value and timing of trigger relative to stimulus onset
-        
         
         # Initialize response variables
         t_0_v = flip_marks['t0_dev']
@@ -269,18 +220,10 @@ for group_idx in range(num_groups):
                 presenter.send_trigger_opm(response_trigger_code)  # send response trigger using pixel mode
                 presenter.win.flip()  # Ensure the trigger is sent immediately
 
-                if key_pressed == "white":  # exit button
-                    cleanup_and_exit(device, win)
-                break
-                
         # Show fixation
-        #win.callOnFlip(presenter.send_trigger, 9)    # johanna commented this out on request of tineke
         stimuli['Fix_Dot'].draw()
         win.callOnFlip(timer.reset)  # Mark fixation onset time
         win.flip()
-        print_trigger_info(device) # Debugging output to check the video line value
-        
-        # timer = core.Clock()  # Reset timer for fixation period
         
         # Continue monitoring during fixation if no response yet
         if not key_pressed:
@@ -296,10 +239,6 @@ for group_idx in range(num_groups):
                     presenter.send_trigger_opm(response_trigger_code)
                     presenter.win.flip()  # Ensure the trigger is sent immediately
 
-                    if key_pressed == 'white':  # exit button
-                        # core.quit()
-                        cleanup_and_exit(device, win)
-                    break
             # Wait for any remaining fixation time
             remaining_time = jitter - timer.getTime()
             if remaining_time > 0:
@@ -384,10 +323,11 @@ if total_trials > 0:
 else:
     accuracy_percentage = 0
 
+text_DE=f'Übung abgeschlossen!\n\nSie waren bei {accuracy_percentage:.1f}% der Versuche korrekt.\n\nDrücken Sie den weißen Knopf, um fortzufahren.'
+
 # Create accuracy feedback text
 accuracy_text = visual.TextStim(
-    win,
-    text=f'Practice complete!\n\nYou were correct on {accuracy_percentage:.1f}% of trials.\n\nPress SPACE to continue.',
+    win,text_DE,
     color='white',
     height=1,
     pos=(0, 0),

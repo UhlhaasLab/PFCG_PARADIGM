@@ -21,15 +21,21 @@ datawd = os.path.join(cwd_, 'data')
 
 # ==================== SET PARTICIPANT ID ==================== #
 date_str = datetime.now().strftime("%Y-%m-%d")
-# participant_id = 'Erfan'    # -----------------------------------------------> ADAPT
 
 parser = argparse.ArgumentParser()
+
 parser.add_argument("--participant", type=str, required=True)
+parser.add_argument("--block", type=int, required=True)
+
 args = parser.parse_args()
 
 participant_id = args.participant
+BLOCK = args.block
+
 print("Running participant:", participant_id)
-participant_dir = os.path.join(datawd, participant_id) 
+print("Running block:", BLOCK)
+
+participant_dir = os.path.join(datawd, participant_id)
 
 if not os.path.exists(participant_dir):
     os.makedirs(participant_dir)
@@ -38,12 +44,6 @@ trials_path = os.path.join(participant_dir, f"{participant_id}_trials.csv")
 
 if not os.path.exists(trials_path):
         shuffle_blocks(participant_id, datawd)
-
-# Working codes in Lab maestro Simulator
-BUTTON_CODES = {65527:'blue', 65533:'yellow', 65534:'red', 65531:'green', 65519:'white'}
-# , 65535:'button release'
-
-#BUTTON_CODES = { 65528: 'blue', 65522: 'yellow', 65521: 'red', 65524: 'green', 65520: 'button release' }
 
 device      = DATAPixx3()
 
@@ -61,7 +61,7 @@ flush_button_buffer(device, myLog)
 
 
 # ==================== MONITOR ==================== #
-TestingPort = True      # True if on a laptop. False if in EEG-lab/Sudring ------> ADAPT (also in utils_stimuly.py)
+TestingPort = True      # True if on a laptop. 
 
 if TestingPort:
     viewing_distance_cm = 57.3    
@@ -115,9 +115,6 @@ if not os.path.exists(datafile_path):
         writer.writerow(['block', 'trial', 'trialtype', 'trialtype_string', 'cuetype', 'cuetype_string', 'correct_key', 'key_pressed','is_resp_corr', 'reaction_time', 'reaction_time_vpixx'])  # Add reaction_time_vpixx to headers
 
 # ==================== EXPERIMENT ==================== #
-# symbol_offset = 1.5 # sets degrees from the centre --------------------------> is this OK also for the OPM lab
-
-BLOCK = 1   # ------------------------------------------------> ADAPT
 
 trialtype = get_block_trialtypes(BLOCK, participant_id, datawd)
 cuetype = get_block_cuetypes(BLOCK, participant_id, datawd)
@@ -144,13 +141,8 @@ for group_idx in range(num_groups):
         stimuli['welcome_text'].draw()
         win.flip()
         button_name = None
-        while button_name != 'green':  # Wait until a button is pressed
+        while button_name != 'white':  # Wait until a button is pressed
             button_name, _ = read_button_press(device, myLog)
-        # button_name = stopButtons(BUTTON_CODES.keys())  # Wait for either start or exit button press
-        # # print(f"Button pressed: {button_name}")
-        # if button_name == exitButton:
-        #     # core.quit()
-        #     cleanup_and_exit(device, win)
         rt_clock.reset()
         event.clearEvents()
         flush_button_buffer(device, myLog)  # Clear any old button presses from the buffer
@@ -158,12 +150,8 @@ for group_idx in range(num_groups):
         stimuli['begin_text'].draw()
         win.flip()
         button_name = None
-        while button_name != 'green':  # Wait until a button is pressed
+        while button_name != 'white':  # Wait until a button is pressed
             button_name, _ = read_button_press(device, myLog)
-        # button_name = stopButtons(BUTTON_CODES.keys())  # Wait for either start or exit button press
-        # if button_name == exitButton:
-        #     # core.quit()
-        #     cleanup_and_exit(device, win)
         rt_clock.reset()
         event.clearEvents()
         flush_button_buffer(device, myLog)  # Clear any old button presses from the buffer
@@ -176,7 +164,7 @@ for group_idx in range(num_groups):
     drawPixelModeTrigger(win, Trigger2GB(10)) 
     win.flip()
     core.wait(0.5)
-    print_trigger_info(device)  # Debugging output to check the video line value
+    # print_trigger_info(device)  # Debugging output to check the video line value
     
     # Show fixation for 2500ms
     stimuli['Fix_Dot'].draw()
@@ -215,7 +203,6 @@ for group_idx in range(num_groups):
         arrow_stimulus.draw()
         # Send trigger at Flip
         if target_trigger_code is not None:
-            # win.callOnFlip(presenter.send_trigger, target_trigger_code)
             drawPixelModeTrigger(win, Trigger2GB(target_trigger_code))  # send trigger using pixel mode
 
         timer = core.Clock()
@@ -224,7 +211,7 @@ for group_idx in range(num_groups):
         win.callOnFlip(lambda: flip_marks.setdefault('t0_dev', device.getTime()))
         win.callOnFlip(timer.reset)
         win.flip()
-        print_trigger_info(device) # Debugging output to check the video line value and timing of trigger relative to stimulus onset
+        # print_trigger_info(device) # Debugging output to check the video line value and timing of trigger relative to stimulus onset
         
         
         # Initialize response variables
@@ -252,19 +239,15 @@ for group_idx in range(num_groups):
                 presenter.send_trigger_opm(response_trigger_code)  # send response trigger using pixel mode
                 presenter.win.flip()  # Ensure the trigger is sent immediately
 
-                if key_pressed == "white":  # exit button
+                if key_pressed == "white":  # exit button can be reomeved if not desired to allow exit 
                     cleanup_and_exit(device, win)
                 break
                 
         # Show fixation
-        #win.callOnFlip(presenter.send_trigger, 9)    # johanna commented this out on request of tineke
         stimuli['Fix_Dot'].draw()
         win.callOnFlip(timer.reset)  # Mark fixation onset time
         win.flip()
-        # print_trigger_info(device) # Debugging output to check the video line value
-        
-        # timer = core.Clock()  # Reset timer for fixation period
-        
+
         # Continue monitoring during fixation if no response yet
         if not key_pressed:
             while timer.getTime() < jitter:
@@ -279,10 +262,10 @@ for group_idx in range(num_groups):
                     presenter.send_trigger_opm(response_trigger_code)
                     presenter.win.flip()  # Ensure the trigger is sent immediately
 
-                    if key_pressed == 'white':  # exit button
-                        # core.quit()
+                    if key_pressed == 'white':  # exit button can be reomeved if not desired to allow exit 
                         cleanup_and_exit(device, win)
                     break
+
             # Wait for any remaining fixation time
             remaining_time = jitter - timer.getTime()
             if remaining_time > 0:
