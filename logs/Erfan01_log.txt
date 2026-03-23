@@ -1,7 +1,18 @@
 Running participant: Erfan01
-Running block: 1
-Video line value: 10
 Video line value: 200
-Video line value: 43690
-Video line value: 4
-3.8819 	WARNING 	psychopy.parallel has been imported but no parallel port driver found. Install either inpout32, inpoutx64 or dlportio
+Starting next block: 2
+Video line value: 100
+Traceback (most recent call last):
+  File "C:\Users\barada01\Documents\paradigm\BI exp\BI-task-switch\psychopy-PFC\PFCG_PARADIGM\PFCG_paradigm.py", line 238, in <module>
+    button_name, timestamp = read_button_press(device, myLog)  # Check for button presses
+  File "C:\Users\barada01\Documents\paradigm\BI exp\BI-task-switch\psychopy-PFC\PFCG_PARADIGM\pfcg_utils\utils_bottons.py", line 31, in read_button_press
+    device.updateRegisterCache()
+  File "C:\Users\barada01\AppData\Roaming\psychopy3\packages\Python310\site-packages\pypixxlib\dpxDevice.py", line 27, in wrapper
+    ret =  function(*args, **kwargs)
+  File "C:\Users\barada01\AppData\Roaming\psychopy3\packages\Python310\site-packages\pypixxlib\dpxDevice.py", line 171, in updateRegisterCache
+    DPxUpdateRegCache()
+  File "C:\Users\barada01\AppData\Roaming\psychopy3\packages\Python310\site-packages\pypixxlib\_libdpx.py", line 1025, in DPxUpdateRegCache
+    _DPxUpdateRegCacheCall()
+KeyboardInterrupt
+6.7096 	WARNING 	psychopy.parallel has been imported but no parallel port driver found. Install either inpout32, inpoutx64 or dlportio
+^C
