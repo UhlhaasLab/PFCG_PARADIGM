@@ -92,7 +92,7 @@ monitor.setSizePix(monitor_size_pix)
 monitor.save()
 
 # win = visual.Window(monitor=monitor, fullscr=True, color=("#AAAAAA"), units="deg") # Create the window with aforementioned monitor
-win = visual.Window( monitor=monitor_name, color=("#AAAAAA"), units="pix",screen=0, size = [1280, 720], allowGUI=False, fullscr=True) # Create the window with aforementioned monitor
+win = visual.Window( monitor=monitor_name, color=("#AAAAAA"), units="pix",screen=2, size = [1920, 1080], allowGUI=False, fullscr=True) # Create the window with aforementioned monitor
 win.mouseVisible = False # Hide mouse
 
 # ==================== IMPORT STIMULI ==================== #
@@ -111,7 +111,9 @@ datafile_path = os.path.join(participant_dir, f"{participant_id}_behaviour_{date
 if not os.path.exists(datafile_path):
     with open(datafile_path, 'w', newline='') as f:
         writer = csv.writer(f)
-        writer.writerow(['block', 'trial', 'trialtype', 'trialtype_string', 'cuetype', 'cuetype_string', 'correct_key', 'key_pressed','is_resp_corr', 'reaction_time', 'reaction_time_vpixx'])  # Add reaction_time_vpixx to headers
+        writer.writerow(['block', 'trial', 'trialtype', 'trialtype_string', 'cuetype', 'cuetype_string', 'correct_key', 'key_pressed','is_resp_corr', 'reaction_time', 'reaction_time_vpixx'])
+    # Set file permissions to be accessible by any user
+    os.chmod(datafile_path, 0o666)
 
 # ==================== EXPERIMENT ==================== #
 if args.block:
@@ -222,6 +224,7 @@ for BLOCK in block:
             
             # Initialize response variables
             t_0_v = flip_marks['t0_dev']
+            button_name = None
             key_pressed = None
             reaction_time = None
             reaction_time_vpixx = None
@@ -259,8 +262,8 @@ for BLOCK in block:
                 while timer.getTime() < jitter:
                     # flush_button_buffer(device, myLog)  # Clear any old button presses from the buffer
                     button_name, timestamp = read_button_press(device, myLog)  # Check for button presses
-                    if button_name:
-                        key_pressed = button_name
+                    key_pressed = button_name
+                    if key_pressed:
                         # RT during fixation = 0.5 + time into fixation
                         reaction_time = arrow_duration + timer.getTime()
                         reaction_time_vpixx = timestamp - t_0_v  # Calculate reaction time based on VPixx timestamp

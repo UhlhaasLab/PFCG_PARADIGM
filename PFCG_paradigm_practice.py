@@ -65,7 +65,7 @@ monitor.setDistance(viewing_distance_cm)
 monitor.setSizePix(monitor_size_pix)
 monitor.save()
 
-win = visual.Window( monitor=monitor_name, color=("#AAAAAA"), units="pix",screen=0, size = [1920, 720], allowGUI=False, fullscr=True) # Create the window with aforementioned monitor
+win = visual.Window( monitor=monitor_name, color=("#AAAAAA"), units="pix",screen=2, size = [1920, 1080], allowGUI=False, fullscr=True) # Create the window with aforementioned monitor
 win.mouseVisible = False # Hide mouse
 
 # Set participant ID for loading stimuli
