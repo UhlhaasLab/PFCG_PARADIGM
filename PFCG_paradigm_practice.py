@@ -34,19 +34,22 @@ flush_button_buffer(device, myLog)
 
 
 # ==================== MONITOR ==================== #
-TestingPort = False      # True if on a laptop. False if in EEG-lab/Sudring ------> ADAPT (also in utils_stimuly.py)
+# ==================== MONITOR ==================== #
+TestingPort = True      # True if on a laptop. 
 
 if TestingPort:
     viewing_distance_cm = 57.3    
     monitor_width_cm    = 52.7
     monitor_size_pix    = [1280,720]
     monitor_name        = "testMonitor"
+    screen_num = 0  # Change this to the appropriate screen number for the testing setup
     
 else:   #----------------------> # change OPM/EEG lab port settings
     viewing_distance_cm = 90    
     monitor_width_cm    = 53.7
     monitor_size_pix    = [1920, 1080]
     monitor_name        = "OPM-lab"
+    screen_num = 2  # Change this to the appropriate screen number for the OPM lab setup
     
 """ change the else loop if in EEG Lab Suedring to:
 else:
@@ -65,7 +68,8 @@ monitor.setDistance(viewing_distance_cm)
 monitor.setSizePix(monitor_size_pix)
 monitor.save()
 
-win = visual.Window( monitor=monitor_name, color=("#AAAAAA"), units="pix",screen=2, size = [1920, 1080], allowGUI=False, fullscr=True) # Create the window with aforementioned monitor
+# win = visual.Window(monitor=monitor, fullscr=True, color=("#AAAAAA"), units="deg") # Create the window with aforementioned monitor
+win = visual.Window( monitor=monitor_name, color=("#AAAAAA"), units="pix",screen=screen_num, size = monitor_size_pix, allowGUI=False, fullscr=True) # Create the window with aforementioned monitor
 win.mouseVisible = False # Hide mouse
 
 # Set participant ID for loading stimuli
@@ -210,9 +214,8 @@ for group_idx in range(num_groups):
             # keys = event.getKeys(keyList=['num_7', 'num_9', 'escape'])
 
             button_name, timestamp = read_button_press(device, myLog)  # Check for button presses
-            key_pressed = button_name
-            if key_pressed:
-               
+            if button_name is not None:
+                key_pressed = button_name
                 reaction_time = timer.getTime()
                 reaction_time_vpixx = timestamp - t_0_v  # Calculate reaction time based on VPixx timestamp
 
@@ -226,11 +229,11 @@ for group_idx in range(num_groups):
         win.flip()
         
         # Continue monitoring during fixation if no response yet
-        if not key_pressed:
+        if key_pressed is None:
             while timer.getTime() < jitter:
                 # flush_button_buffer(device, myLog)  # Clear any old button presses from the buffer
                 button_name, timestamp = read_button_press(device, myLog)  # Check for button presses
-                if button_name:
+                if button_name is not None:
                     key_pressed = button_name
                     # RT during fixation = 0.5 + time into fixation
                     reaction_time = arrow_duration + timer.getTime()

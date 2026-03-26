@@ -1,0 +1,33 @@
+Running participant: Erfan02
+Video line value: 10
+Video line value: 200
+Video line value: 43690
+Button pressed: green
+Video line value: 130
+key_pressed: green
+Video line value: 43690
+Button pressed: green
+Video line value: 140
+key_pressed: green
+Video line value: 43690
+Button pressed: green
+Video line value: 150
+key_pressed: green
+Video line value: 43690
+Button pressed: green
+Video line value: 3
+key_pressed: green
+Video line value: 43690
+pressed during fixation
+Button pressed: red
+Video line value: 43690
+key_pressed: red
+Video line value: 10
+Traceback (most recent call last):
+  File "C:\Users\barada01\Documents\paradigm\BI exp\BI-task-switch\psychopy-PFC\PFCG_PARADIGM\PFCG_paradigm.py", line 182, in <module>
+    core.wait(2.5)
+  File "C:\Users\barada01\AppData\Local\Programs\PsychoPy\lib\site-packages\psychopy\clock.py", line 593, in wait
+    time.sleep(sleepDur)
+KeyboardInterrupt
+4.0243 	WARNING 	psychopy.parallel has been imported but no parallel port driver found. Install either inpout32, inpoutx64 or dlportio
+^C

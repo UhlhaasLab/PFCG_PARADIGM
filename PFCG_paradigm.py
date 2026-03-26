@@ -60,19 +60,21 @@ flush_button_buffer(device, myLog)
 
 
 # ==================== MONITOR ==================== #
-TestingPort = False      # True if on a laptop. 
+TestingPort = True      # True if on a laptop. 
 
 if TestingPort:
     viewing_distance_cm = 57.3    
     monitor_width_cm    = 52.7
     monitor_size_pix    = [1280,720]
     monitor_name        = "testMonitor"
+    screen_num = 0  # Change this to the appropriate screen number for the testing setup
     
 else:   #----------------------> # change OPM/EEG lab port settings
     viewing_distance_cm = 90    
     monitor_width_cm    = 53.7
     monitor_size_pix    = [1920, 1080]
     monitor_name        = "OPM-lab"
+    screen_num = 2  # Change this to the appropriate screen number for the OPM lab setup
     
 """ change the else loop if in EEG Lab Suedring to:
 else:
@@ -92,7 +94,7 @@ monitor.setSizePix(monitor_size_pix)
 monitor.save()
 
 # win = visual.Window(monitor=monitor, fullscr=True, color=("#AAAAAA"), units="deg") # Create the window with aforementioned monitor
-win = visual.Window( monitor=monitor_name, color=("#AAAAAA"), units="pix",screen=2, size = [1920, 1080], allowGUI=False, fullscr=True) # Create the window with aforementioned monitor
+win = visual.Window( monitor=monitor_name, color=("#AAAAAA"), units="pix",screen=screen_num, size = monitor_size_pix, allowGUI=False, fullscr=True) # Create the window with aforementioned monitor
 win.mouseVisible = False # Hide mouse
 
 # ==================== IMPORT STIMULI ==================== #
@@ -112,8 +114,6 @@ if not os.path.exists(datafile_path):
     with open(datafile_path, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(['block', 'trial', 'trialtype', 'trialtype_string', 'cuetype', 'cuetype_string', 'correct_key', 'key_pressed','is_resp_corr', 'reaction_time', 'reaction_time_vpixx'])
-    # Set file permissions to be accessible by any user
-    os.chmod(datafile_path, 0o666)
 
 # ==================== EXPERIMENT ==================== #
 if args.block:
@@ -124,6 +124,7 @@ else:
     block = range(1, 11)
 
 for BLOCK in block: 
+    print(f"Starting Block {BLOCK}...")
     trialtype = get_block_trialtypes(BLOCK, participant_id, datawd)
     cuetype = get_block_cuetypes(BLOCK, participant_id, datawd)
     ntrials = len(trialtype)
@@ -172,7 +173,7 @@ for BLOCK in block:
         drawPixelModeTrigger(win, Trigger2GB(10)) 
         win.flip()
         core.wait(0.5)
-        # print_trigger_info(device)  # Debugging output to check the video line value
+        print_trigger_info(device)  # Debugging output to check the video line value
         
         # Show fixation for 2500ms
         stimuli['Fix_Dot'].draw()
@@ -184,7 +185,7 @@ for BLOCK in block:
         cue_trigger_code = presenter.get_cue_trigger_code(cueid)
         presenter.present_cue(cue_stimulus, trigger_code=cue_trigger_code)
         
-        # print_trigger_info(device) # Debugging output to check the video line value
+        print_trigger_info(device) # Debugging output to check the video line value
 
         # Show fixation. Jitter between 1400-1600ms
         jitter = np.random.choice(np.arange(1.4, 1.61, 0.01))
@@ -219,7 +220,7 @@ for BLOCK in block:
             win.callOnFlip(lambda: flip_marks.setdefault('t0_dev', device.getTime()))
             win.callOnFlip(timer.reset)
             win.flip()
-            # print_trigger_info(device) # Debugging output to check the video line value and timing of trigger relative to stimulus onset
+            print_trigger_info(device) # Debugging output to check the video line value and timing of trigger relative to stimulus onset
             
             
             # Initialize response variables
@@ -238,16 +239,16 @@ for BLOCK in block:
                 # keys = event.getKeys(keyList=['num_7', 'num_9', 'escape'])
 
                 button_name, timestamp = read_button_press(device, myLog)  # Check for button presses
-                key_pressed = button_name
-                if key_pressed:
-                
+                if button_name is not None:
+                    key_pressed = button_name
+                    print(f"Button pressed: {key_pressed}")  # Debugging output for button presses and timestamps
                     reaction_time = timer.getTime()
                     reaction_time_vpixx = timestamp - t_0_v  # Calculate reaction time based on VPixx timestamp
 
                     response_trigger_code = presenter.get_response_trigger_code(key_pressed)
                     presenter.send_trigger_opm(response_trigger_code)  # send response trigger using pixel mode
                     presenter.win.flip()  # Ensure the trigger is sent immediately
-
+                    print_trigger_info(device)  # Debugging output to check the video line value and timing of response trigger
                     # if key_pressed == "white":  # exit button can be reomeved if not desired to allow exit 
                     #     cleanup_and_exit(device, win)
                     # break
@@ -258,18 +259,21 @@ for BLOCK in block:
             win.flip()
 
             # Continue monitoring during fixation if no response yet
-            if not key_pressed:
+            if key_pressed is None:
                 while timer.getTime() < jitter:
                     # flush_button_buffer(device, myLog)  # Clear any old button presses from the buffer
                     button_name, timestamp = read_button_press(device, myLog)  # Check for button presses
-                    key_pressed = button_name
-                    if key_pressed:
+                    if button_name is not None:
+                        key_pressed = button_name
+                        print("pressed during fixation")  # Debugging output to indicate response during fixation
+                        print(f"Button pressed: {key_pressed}")  # Debugging output for button presses and timestamps
                         # RT during fixation = 0.5 + time into fixation
                         reaction_time = arrow_duration + timer.getTime()
                         reaction_time_vpixx = timestamp - t_0_v  # Calculate reaction time based on VPixx timestamp
                         response_trigger_code = presenter.get_response_trigger_code(key_pressed)
                         presenter.send_trigger_opm(response_trigger_code)
-                        presenter.win.flip()  # Ensure the trigger is sent immediately
+                        presenter.win.flip() 
+                        print_trigger_info(device)  # Ensure the trigger is sent immediately
 
                         # if key_pressed == 'white':  # exit button can be reomeved if not desired to allow exit 
                         #     cleanup_and_exit(device, win)
@@ -318,6 +322,7 @@ for BLOCK in block:
             reaction_time = round(reaction_time, 4) if reaction_time is not None else None
             reaction_time_vpixx = round(reaction_time_vpixx, 4) if reaction_time_vpixx is not None else None
             # Write to CSV
+            print(f"key_pressed: {key_pressed}")
             with open(datafile_path, 'a', newline='') as f:
                 writer = csv.writer(f)
                 writer.writerow([
