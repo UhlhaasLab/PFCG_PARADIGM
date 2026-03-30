@@ -1,21 +1,21 @@
-from psychopy import visual, core, event, monitors, logging, sound, parallel
+from psychopy import  core, parallel
 import psychtoolbox as ptb
 import numpy as np
-from pfcg_utils.PixelMode import Trigger2GB, drawPixelModeTrigger, Trigger2RGB
+from pfcg_utils.PixelMode import Trigger2GB, drawPixelModeTrigger, print_trigger_info
 
 # Initialize port (use your correct address)
 TestingPort = True # True if on a laptop. False if in EEG-lab/Sudring -----------> ADAPT
+trigger_duration = 0.03 
 
-
-if TestingPort:
-    port = None
-else:
-    from psychopy import parallel
-    try:
-        port = parallel.ParallelPort(address=0x378)
-    except Exception:
-        print("Parallel port not found, setting to None")
-        port = None
+# if TestingPort:
+#     port = None
+# else:
+#     from psychopy import parallel
+#     try:
+#         port = parallel.ParallelPort(address=0x378)
+#     except Exception:
+#         print("Parallel port not found, setting to None")
+#         port = None
 
 
 
@@ -69,14 +69,22 @@ class StimulusPresenter:
         drawPixelModeTrigger(self.win, Trigger2GB(code))
         # self.win.flip()
 
-    def present_stimulus(self, stimulus, duration, trigger_code=None):
+    def present_stimulus(self, stimulus, duration, trigger_code=None, device=None):
         """Present a single stimulus for a specified duration"""
         
-        stimulus.draw()
         if trigger_code is not None:
+            stimulus.draw()
             self.send_trigger_opm(trigger_code)
-        self.win.flip()
-        core.wait(duration)
+            self.win.flip()
+            core.wait(trigger_duration)
+            print_trigger_info(device)
+            stimulus.draw()
+            self.win.flip()
+            core.wait(duration - trigger_duration)
+        else:
+            stimulus.draw()
+            self.win.flip()
+            core.wait(duration)
 
     def present_RS(self, resting_state, duration=60, trigger_code=7):
         """Present fixation dot for resting state measurement"""
@@ -87,9 +95,9 @@ class StimulusPresenter:
         self.present_stimulus(fixation, duration, trigger_code)
         return duration
 
-    def present_cue(self, cue_stimulus, duration=0.5, trigger_code=None):
+    def present_cue(self, cue_stimulus, duration=0.5, trigger_code=None, device=None):
         """Present congruent or incongruent cue"""
-        self.present_stimulus(cue_stimulus, duration, trigger_code)
+        self.present_stimulus(cue_stimulus, duration, trigger_code, device)
 
     def target_type(self, stimuli, trialid):
         """Get the appropriate arrow stimulus based on trial type"""

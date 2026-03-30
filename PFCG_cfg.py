@@ -35,25 +35,25 @@ def preload_stimuli(win, stimuliwd, subjdir, DE=True):
     Fix_Dot = visual.ImageStim(win, image=os.path.join(stimuliwd, 'Fixation_Dot.png'),
                             size=None)
     
-    # Text stimuli
     welcome_text = visual.TextStim(win, text='Welcome to the experiment! \n\nPress 8 when you are ready to start.', color='white', 
                                 height=1, pos=(0, 0), units='deg', wrapWidth=60)
-    welcome_text_DE = visual.TextStim(win, text='Willkommen zum Experiment! \n\nDrücken Sie den weißen Knopf, wenn Sie bereit sind zu beginnen.', color='white', 
+    welcome_text_DE = visual.TextStim(win, text='Willkommen zum Experiment! \n\nDrücken Sie den blauen Knopf, wenn Sie bereit sind zu beginnen.', color='white', 
                                 height=1, pos=(0, 0), units='deg', wrapWidth=60)
-    
+
     welcome_practice = visual.TextStim(win, text='Welcome to the practice blocks of the experiment! \n\nPress 8 when you are ready to start.', color='white', 
                                 height=1, pos=(0, 0), units='deg', wrapWidth=60)
-    welcome_practice_DE = visual.TextStim(win, text='Willkommen zu den Übungsblöcken des Experiments! \n\nDrücken Sie den weißen Knopf, wenn Sie bereit sind zu beginnen.', color='white',
-                                height=1, pos=(0, 0), units='deg', wrapWidth=60)
     
+    welcome_practice_DE = visual.TextStim(win, text='Willkommen zu den Übungsblöcken des Experiments! \n\nDrücken Sie den blauen Knopf, wenn Sie bereit sind zu beginnen.', color='white',
+                                height=1, pos=(0, 0), units='deg', wrapWidth=60)
+
     RS_text = visual.TextStim(win, text='We begin by taking a resting state OPM. We ask you to look at following fixation, moving as little as possible, for one minute. When you are ready, press the space bar to begin', color='white', 
                             height=1, pos=(0, 0), units='deg', wrapWidth=60)
-    RS_text_DE = visual.TextStim(win, text='Wir beginnen mit der Aufnahme eines Ruhe-OPMs. Wir bitten Sie, auf die folgende Fixation zu schauen und sich dabei so wenig wie möglich zu bewegen, für eine Minute. Wenn Sie bereit sind, drücken Sie die Leertaste, um zu beginnen.', color='white',
+    RS_text_DE = visual.TextStim(win, text='Wir beginnen mit einer Ruheaufnahme (OPM). Bitte schauen Sie für eine Minute auf das folgende Fixationskreuz und bewegen Sie sich dabei so wenig wie möglich. Wenn Sie bereit sind, drücken Sie den blauen Knopf, um zu beginnen.', color='white',
                             height=1, pos=(0, 0), units='deg', wrapWidth=60)
 
     begin_text = visual.TextStim(win, text='The task will now begin. \n\nPlease try to respond as accurately as possible. \n\nPress 8 when you are ready to start.', color='white', 
                                 height=1, pos=(0, 0), units='deg', wrapWidth=60)
-    begin_text_DE = visual.TextStim(win, text='Die Aufgabe beginnt jetzt. \n\nBitte versuchen Sie, so genau wie möglich zu antworten. \n\nDrücken Sie den weißen Knopf, wenn Sie bereit sind zu beginnen.', color='white', 
+    begin_text_DE = visual.TextStim(win, text='Die Aufgabe beginnt jetzt. \n\nBitte versuchen Sie, so genau wie möglich zu antworten. \n\nDrücken Sie den blauen Knopf, wenn Sie bereit sind zu beginnen.', color='white', 
                                 height=1, pos=(0, 0), units='deg', wrapWidth=60)
                                 
     # instructions

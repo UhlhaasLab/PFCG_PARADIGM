@@ -1,6 +1,5 @@
-from psychopy import visual, core, event
+from psychopy import  core
 from pypixxlib import _libdpx as dp
-from pfcg_utils.PixelMode import RGB2Trigger
 
 BUTTON_CODES_ALL = {65527:'blue', 65533:'yellow', 65534:'red', 65531:'green', 65519:'white', 65535:'button release'}
 # uncomment the line when in OPM lab

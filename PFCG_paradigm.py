@@ -86,6 +86,8 @@ else:
     monitor_name        = "Sudring"
 """
 
+trigger_duration = 0.03  # Duration of trigger pulse in seconds
+
 # Apply Monitor Settings
 monitor = monitors.Monitor(monitor_name)
 monitor.setWidth(monitor_width_cm)
@@ -164,16 +166,32 @@ for BLOCK in block:
             rt_clock.reset()
             event.clearEvents()
             flush_button_buffer(device, myLog)  # Clear any old button presses from the buffer
+
+            for i in range(3, 0, -1):
+                circle = visual.Circle(win, radius=10, fillColor='white', lineColor='white', units='deg')
+                circle.draw()
+                countdown_text = visual.TextStim(win, text=str(i), color='black', height=5.5, pos=(0, 0), units='deg', bold=True)
+                countdown_text.draw()
+                win.flip()
+                core.wait(1)
         
         # Task begins here for each mini-block
 
         
         # Show baseline cue for 500ms
+        #devide the 500 ms into 2 parts, first flip with pixel mode trigger to send the trigger for baseline cue, 
+        # then draw the cue again for the required duration adjust the core.wait() duration to account for the time taken by the first flip and drawing the cue again,
+        #  so that the total duration of the baseline cue presentation remains 500 ms
+
         stimuli['cue_baseline'].draw()
         drawPixelModeTrigger(win, Trigger2GB(10)) 
         win.flip()
-        core.wait(0.5)
-        print_trigger_info(device)  # Debugging output to check the video line value
+        core.wait(trigger_duration)  # Adjusted to account for time taken by two flips and drawing the cue again
+        print_trigger_info(device) 
+        stimuli['cue_baseline'].draw()
+        win.flip()
+        core.wait(0.5 - trigger_duration)  # Adjusted to account for time taken by two flips and drawing the cue again
+        # Debugging output to check the video line value
         
         # Show fixation for 2500ms
         stimuli['Fix_Dot'].draw()
@@ -183,9 +201,8 @@ for BLOCK in block:
         # Show cue_cong or cue_incg for 500ms
         cue_stimulus = presenter.get_cue_stimulus(stimuli, cueid)
         cue_trigger_code = presenter.get_cue_trigger_code(cueid)
-        presenter.present_cue(cue_stimulus, trigger_code=cue_trigger_code)
+        presenter.present_cue(cue_stimulus, trigger_code=cue_trigger_code, device=device)  # This function now handles both the trigger and the timing of the cue presentation
         
-        print_trigger_info(device) # Debugging output to check the video line value
 
         # Show fixation. Jitter between 1400-1600ms
         jitter = np.random.choice(np.arange(1.4, 1.61, 0.01))
@@ -220,8 +237,11 @@ for BLOCK in block:
             win.callOnFlip(lambda: flip_marks.setdefault('t0_dev', device.getTime()))
             win.callOnFlip(timer.reset)
             win.flip()
+            core.wait(trigger_duration)  # Wait for the duration of the trigger pulse
             print_trigger_info(device) # Debugging output to check the video line value and timing of trigger relative to stimulus onset
-            
+            # flip just to send trigger for target, then draw the target again for the required duration  
+            arrow_stimulus.draw()
+            win.flip()
             
             # Initialize response variables
             t_0_v = flip_marks['t0_dev']
@@ -235,19 +255,20 @@ for BLOCK in block:
             flush_button_buffer(device, myLog)  # Clear any old button presses from the buffer
             
             # Monitor for responses during target presentation (0.5s)
-            while timer.getTime() < arrow_duration:
+            while timer.getTime() < arrow_duration-trigger_duration:
                 # keys = event.getKeys(keyList=['num_7', 'num_9', 'escape'])
 
                 button_name, timestamp = read_button_press(device, myLog)  # Check for button presses
                 if button_name is not None:
                     key_pressed = button_name
-                    print(f"Button pressed: {key_pressed}")  # Debugging output for button presses and timestamps
+                    # print(f"Button pressed: {key_pressed}")  # Debugging output for button presses and timestamps
                     reaction_time = timer.getTime()
                     reaction_time_vpixx = timestamp - t_0_v  # Calculate reaction time based on VPixx timestamp
 
                     response_trigger_code = presenter.get_response_trigger_code(key_pressed)
                     presenter.send_trigger_opm(response_trigger_code)  # send response trigger using pixel mode
-                    presenter.win.flip()  # Ensure the trigger is sent immediately
+                    presenter.win.flip() 
+                    core.wait(trigger_duration)  # Ensure the trigger is sent immediately
                     print_trigger_info(device)  # Debugging output to check the video line value and timing of response trigger
                     # if key_pressed == "white":  # exit button can be reomeved if not desired to allow exit 
                     #     cleanup_and_exit(device, win)
@@ -265,8 +286,8 @@ for BLOCK in block:
                     button_name, timestamp = read_button_press(device, myLog)  # Check for button presses
                     if button_name is not None:
                         key_pressed = button_name
-                        print("pressed during fixation")  # Debugging output to indicate response during fixation
-                        print(f"Button pressed: {key_pressed}")  # Debugging output for button presses and timestamps
+                        # print("pressed during fixation")  # Debugging output to indicate response during fixation
+                        # print(f"Button pressed: {key_pressed}")  # Debugging output for button presses and timestamps
                         # RT during fixation = 0.5 + time into fixation
                         reaction_time = arrow_duration + timer.getTime()
                         reaction_time_vpixx = timestamp - t_0_v  # Calculate reaction time based on VPixx timestamp
@@ -322,7 +343,7 @@ for BLOCK in block:
             reaction_time = round(reaction_time, 4) if reaction_time is not None else None
             reaction_time_vpixx = round(reaction_time_vpixx, 4) if reaction_time_vpixx is not None else None
             # Write to CSV
-            print(f"key_pressed: {key_pressed}")
+            # print(f"key_pressed: {key_pressed}")
             with open(datafile_path, 'a', newline='') as f:
                 writer = csv.writer(f)
                 writer.writerow([
@@ -375,6 +396,14 @@ for BLOCK in block:
         keys = event.getKeys(keyList=['space', 'escape'])
         if 'space' in keys:
             print(f"Starting next block: {BLOCK + 1}")
+            # Countdown with number in circle like a movie
+            for i in range(3, 0, -1):
+                circle = visual.Circle(win, radius=10, fillColor='white', lineColor='white', units='deg')
+                circle.draw()
+                countdown_text = visual.TextStim(win, text=str(i), color='black', height=5.5, pos=(0, 0), units='deg', bold=True)
+                countdown_text.draw()
+                win.flip()
+                core.wait(1)
             break
         elif 'escape' in keys:
             cleanup_and_exit(device, win)
