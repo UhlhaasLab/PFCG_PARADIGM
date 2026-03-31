@@ -67,7 +67,7 @@ if TestingPort:
     monitor_width_cm    = 52.7
     monitor_size_pix    = [1280,720]
     monitor_name        = "testMonitor"
-    screen_num = 0  # Change this to the appropriate screen number for the testing setup
+    screen_num = 1  # Change this to the appropriate screen number for the testing setup
     
 else:   #----------------------> # change OPM/EEG lab port settings
     viewing_distance_cm = 90    
@@ -237,6 +237,7 @@ for BLOCK in block:
             win.callOnFlip(lambda: flip_marks.setdefault('t0_dev', device.getTime()))
             win.callOnFlip(timer.reset)
             win.flip()
+
             core.wait(trigger_duration)  # Wait for the duration of the trigger pulse
             print_trigger_info(device) # Debugging output to check the video line value and timing of trigger relative to stimulus onset
             # flip just to send trigger for target, then draw the target again for the required duration  
@@ -255,7 +256,7 @@ for BLOCK in block:
             flush_button_buffer(device, myLog)  # Clear any old button presses from the buffer
             
             # Monitor for responses during target presentation (0.5s)
-            while timer.getTime() < arrow_duration-trigger_duration:
+            while timer.getTime() < arrow_duration:
                 # keys = event.getKeys(keyList=['num_7', 'num_9', 'escape'])
 
                 button_name, timestamp = read_button_press(device, myLog)  # Check for button presses
@@ -266,6 +267,7 @@ for BLOCK in block:
                     reaction_time_vpixx = timestamp - t_0_v  # Calculate reaction time based on VPixx timestamp
 
                     response_trigger_code = presenter.get_response_trigger_code(key_pressed)
+                    arrow_stimulus.draw()
                     presenter.send_trigger_opm(response_trigger_code)  # send response trigger using pixel mode
                     presenter.win.flip() 
                     core.wait(trigger_duration)  # Ensure the trigger is sent immediately
@@ -273,7 +275,7 @@ for BLOCK in block:
                     # if key_pressed == "white":  # exit button can be reomeved if not desired to allow exit 
                     #     cleanup_and_exit(device, win)
                     # break
-                    
+      
             # Show fixation
             stimuli['Fix_Dot'].draw()
             win.callOnFlip(timer.reset)  # Mark fixation onset time
@@ -292,8 +294,11 @@ for BLOCK in block:
                         reaction_time = arrow_duration + timer.getTime()
                         reaction_time_vpixx = timestamp - t_0_v  # Calculate reaction time based on VPixx timestamp
                         response_trigger_code = presenter.get_response_trigger_code(key_pressed)
+                        stimuli['Fix_Dot'].draw()
                         presenter.send_trigger_opm(response_trigger_code)
                         presenter.win.flip() 
+
+                        core.wait(trigger_duration)  # Ensure the trigger is sent immediately
                         print_trigger_info(device)  # Ensure the trigger is sent immediately
 
                         # if key_pressed == 'white':  # exit button can be reomeved if not desired to allow exit 
