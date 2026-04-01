@@ -1,20 +1,17 @@
-# everywhere with "ADAPT" needs to be changed
-# adapt keys/buttons etc to OPM: correct_key defined here and in utils_trials
-
 import os
 # import serial
-import csv
+# import csv
 import numpy as np
-from datetime import datetime
-import random
-from psychopy import logging, prefs, core, visual, event, monitors
+# from datetime import datetime
+# import random
+from psychopy import core, visual, event, monitors
 
 from PFCG_cfg import stimwd, datawd, preload_stimuli
 from pfcg_utils.utils_bottons import flush_button_buffer,cleanup_and_exit, read_button_press, stopButtons
-from pfcg_utils.utils_stimuli import StimulusPresenter, sec_to_fr
+from pfcg_utils.utils_stimuli import StimulusPresenter
 from pfcg_utils.utils_trials import get_block_trialtypes, get_block_cuetypes
 # from pfcg_utils.buttons import collect_response, flush_buttons
-from pfcg_utils.PixelMode import drawPixelModeTrigger, RGB2Trigger, Trigger2RGB, print_trigger_info, GB2trigger, Trigger2GB
+from pfcg_utils.PixelMode import drawPixelModeTrigger,  print_trigger_info, GB2trigger, Trigger2GB
 from pypixxlib.datapixx import DATAPixx3
 
 
@@ -80,7 +77,7 @@ participant_dir = os.path.join(datawd, participant_id)
 stimuli = preload_stimuli(win, stimwd, participant_dir)
 
 rt_clock = core.Clock()
-presenter = StimulusPresenter(window=win, exptimer=rt_clock, triggers=True)
+presenter = StimulusPresenter(window=win, triggers=True)
 
 ## Defining Variables                   
 # symbol_offset = 1.5
@@ -150,7 +147,7 @@ for group_idx in range(num_groups):
     
     # Show baseline cue for 500ms
     stimuli['cue_baseline'].draw()
-    drawPixelModeTrigger(win, Trigger2GB(10)) 
+    # drawPixelModeTrigger(win, Trigger2GB(10)) 
     win.flip()
     core.wait(0.5)
     
@@ -162,7 +159,7 @@ for group_idx in range(num_groups):
     # Show cue_cong or cue_incg for 500ms
     cue_stimulus = presenter.get_cue_stimulus(stimuli, cueid)
     cue_trigger_code = presenter.get_cue_trigger_code(cueid)
-    presenter.present_cue(cue_stimulus, trigger_code=cue_trigger_code)
+    presenter.present_cue(cue_stimulus)
 
     # Show fixation. Jitter between 1400-1600ms
     jitter = np.random.choice(np.arange(1.4, 1.61, 0.01))
@@ -187,8 +184,8 @@ for group_idx in range(num_groups):
         # Send trigger at Flip
         arrow_stimulus.draw()
         # win.flip()
-        if target_trigger_code is not None:
-            drawPixelModeTrigger(win, Trigger2GB(target_trigger_code))  # send trigger using pixel mode
+        # if target_trigger_code is not None:
+        #     drawPixelModeTrigger(win, Trigger2GB(target_trigger_code))  # send trigger using pixel mode
 
 
         timer = core.Clock()
@@ -220,8 +217,8 @@ for group_idx in range(num_groups):
                 reaction_time_vpixx = timestamp - t_0_v  # Calculate reaction time based on VPixx timestamp
 
                 response_trigger_code = presenter.get_response_trigger_code(key_pressed)
-                presenter.send_trigger_opm(response_trigger_code)  # send response trigger using pixel mode
-                presenter.win.flip()  # Ensure the trigger is sent immediately
+                # presenter.send_trigger_opm(response_trigger_code)  # send response trigger using pixel mode
+                # presenter.win.flip()  # Ensure the trigger is sent immediately
 
         # Show fixation
         stimuli['Fix_Dot'].draw()
@@ -239,8 +236,8 @@ for group_idx in range(num_groups):
                     reaction_time = arrow_duration + timer.getTime()
                     reaction_time_vpixx = timestamp - t_0_v  # Calculate reaction time based on VPixx timestamp
                     response_trigger_code = presenter.get_response_trigger_code(key_pressed)
-                    presenter.send_trigger_opm(response_trigger_code)
-                    presenter.win.flip()  # Ensure the trigger is sent immediately
+                    # presenter.send_trigger_opm(response_trigger_code)
+                    # presenter.win.flip()  # Ensure the trigger is sent immediately
 
             # Wait for any remaining fixation time
             remaining_time = jitter - timer.getTime()

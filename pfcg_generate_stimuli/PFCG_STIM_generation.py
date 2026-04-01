@@ -3,10 +3,10 @@
     # Scaling, visual angle, stimulus parameters
 
 import os
-import ctypes
-from psychopy import visual, core, event, monitors, logging
-import numpy as np
-from PIL import Image, ImageDraw
+# import ctypes
+from psychopy import visual, core, monitors
+# import numpy as np
+# from PIL import Image, ImageDraw
 
 # Set current directory
 cwd_ = os.getcwd()

@@ -1,36 +1,8 @@
-from psychopy import  core, parallel
-import psychtoolbox as ptb
+from psychopy import  core
+# import psychtoolbox as ptb
 import numpy as np
 from pfcg_utils.PixelMode import Trigger2GB, drawPixelModeTrigger, print_trigger_info
 
-# Initialize port (use your correct address)
-TestingPort = True # True if on a laptop. False if in EEG-lab/Sudring -----------> ADAPT
-trigger_duration = 0.03 
-
-# if TestingPort:
-#     port = None
-# else:
-#     from psychopy import parallel
-#     try:
-#         port = parallel.ParallelPort(address=0x378)
-#     except Exception:
-#         print("Parallel port not found, setting to None")
-#         port = None
-
-
-
-# Send trigger function
-#def send_trigger(code, timer=None):
-#    """
-#    Sends a trigger code with a pulse duration in seconds.
-#    """
-#    pulse_duration=0.01
-#    port.setData(code)
-#    if timer:
-#        print(round(timer.getTime(), 3))
-#    core.wait(pulse_duration)  # hold trigger
-#    port.setData(0)            # clear trigger
-#    #core.wait(pulse_duration)  # wait before next trigger
 
 # Seconds to frames
 def sec_to_fr(dur_s, rrate):
@@ -39,22 +11,11 @@ def sec_to_fr(dur_s, rrate):
 
 # Class to present stimuli
 class StimulusPresenter:
-    def __init__(self, window, exptimer, triggers=True):
+    def __init__(self, window, triggers=True, trigger_duration=None):
         self.win        = window
         self.timer      = None         
         self.triggers   = triggers
-        self.blcode     = 2
-        self.nstim      = 4
-        
-        # FIXED: Only try to open the port if we are NOT on the laptop (TestingPort = False)
-        if self.triggers and not TestingPort:
-            try:
-                self.port = parallel.ParallelPort(address=0x378)
-            except Exception:
-                print("Parallel port failed to open. Setting self.port to None.")
-                self.port = None
-        else:
-            self.port = None
+        self.trigger_duration = trigger_duration
 
     def send_trigger(self, code, pulse_duration=0.01):
         """Sends a trigger code with a pulse duration in seconds."""
@@ -76,11 +37,11 @@ class StimulusPresenter:
             stimulus.draw()
             self.send_trigger_opm(trigger_code)
             self.win.flip()
-            core.wait(trigger_duration)
+            core.wait(self.trigger_duration)
             print_trigger_info(device)
             stimulus.draw()
             self.win.flip()
-            core.wait(duration - trigger_duration)
+            core.wait(duration - self.trigger_duration)
         else:
             stimulus.draw()
             self.win.flip()
@@ -108,24 +69,24 @@ class StimulusPresenter:
         else:
             raise ValueError(f"Unknown trialtype: {trialid}")
 
-    def target_response(self, arrow_stimulus, fixation_stimulus, arrow_duration=0.5, response_window=2.0, trigger_code=None):
-        """Present arrow stimulus and show fixation while monitoring for responses"""
-        if trigger_code is not None:
-            self.send_trigger(trigger_code)
+    # def target_response(self, arrow_stimulus, fixation_stimulus, arrow_duration=0.5, response_window=2.0, trigger_code=None):
+    #     """Present arrow stimulus and show fixation while monitoring for responses"""
+    #     if trigger_code is not None:
+    #         self.send_trigger(trigger_code)
         
-        # Show arrow stimulus
-        arrow_stimulus.draw()
-        self.win.flip()
+    #     # Show arrow stimulus
+    #     arrow_stimulus.draw()
+    #     self.win.flip()
         
-        # Start timer at target onset
-        timer = core.Clock()
-        core.wait(arrow_duration)
+    #     # Start timer at target onset
+    #     timer = core.Clock()
+    #     core.wait(arrow_duration)
         
-        # Show fixation for remaining response window
-        fixation_stimulus.draw()
-        self.win.flip()
+    #     # Show fixation for remaining response window
+    #     fixation_stimulus.draw()
+    #     self.win.flip()
         
-        return timer
+    #     return timer
 
     def get_cue_stimulus(self, stimuli, cueid):
         """Get the appropriate cue stimulus based on cue type"""

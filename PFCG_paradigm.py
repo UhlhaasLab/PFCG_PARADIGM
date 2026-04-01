@@ -26,11 +26,13 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument("--participant", type=str, required=True)
 parser.add_argument("--block", type=int, required=False)
+parser.add_argument("--viewing_distance", type=float, required=False)
 
 args = parser.parse_args()
 
 participant_id = args.participant
-
+if args.viewing_distance:
+    viewing_distance_cm = args.viewing_distance
 
 print("Running participant:", participant_id)   
 
@@ -60,31 +62,22 @@ flush_button_buffer(device, myLog)
 
 
 # ==================== MONITOR ==================== #
-TestingPort = True      # True if on a laptop. 
+Testing = True      # True if on a laptop. 
 
-if TestingPort:
-    viewing_distance_cm = 57.3    
+if Testing:   #----------------------> # change to laptop 
+    viewing_distance_cm = 57.3   
     monitor_width_cm    = 52.7
     monitor_size_pix    = [1280,720]
     monitor_name        = "testMonitor"
-    screen_num = 1  # Change this to the appropriate screen number for the testing setup
+    screen_num = 0  # Change this to the appropriate screen number for the testing setup
     
 else:   #----------------------> # change OPM/EEG lab port settings
-    viewing_distance_cm = 90    
+    viewing_distance_cm = viewing_distance_cm if args.viewing_distance else 90
     monitor_width_cm    = 53.7
     monitor_size_pix    = [1920, 1080]
     monitor_name        = "OPM-lab"
     screen_num = 2  # Change this to the appropriate screen number for the OPM lab setup
     
-""" change the else loop if in EEG Lab Suedring to:
-else:
-    # Lab Settings (Sudring)
-    # Change the size depending on the monitor in question
-    viewing_distance_cm = 90    
-    monitor_width_cm    = 53.7
-    monitor_size_pix    = [1920, 1200]
-    monitor_name        = "Sudring"
-"""
 
 trigger_duration = 0.03  # Duration of trigger pulse in seconds
 
@@ -103,9 +96,7 @@ win.mouseVisible = False # Hide mouse
 stimuli = preload_stimuli(win, stimwd, participant_dir) # for modifying relevant stimuli, see utils_stimuli
 
 rt_clock = core.Clock()
-# rt_clock2 = core.Clock()
-# onsettime = rt_clock2.getTime()
-presenter = StimulusPresenter(window=win, exptimer=rt_clock, triggers=True)
+presenter = StimulusPresenter(window=win, triggers=True, trigger_duration=trigger_duration)  # Initialize the StimulusPresenter with trigger duration
 
 # ==================== EXPORT LOG FILE ==================== #
 # Create file path for CSV log
@@ -138,6 +129,36 @@ for BLOCK in block:
     correct_responses = 0
     total_trials = 0
 
+    # Display instruction to be steady
+    instruction_text = visual.TextStim(
+        win,
+        text="Bitte bleiben Sie ruhig und bewegen Sie sich während der Aufgabe nicht.",
+        color='white',
+        height=1,
+        pos=(0, 0),
+        units='deg',
+        wrapWidth=60
+    )
+    instruction_text.draw()
+    win.flip()
+    event.clearEvents()
+    while True:
+        keys = event.getKeys(keyList=['space', 'escape'])
+        if 'space' in keys:
+            break
+        elif 'escape' in keys:
+            cleanup_and_exit(device, win)
+    
+    if BLOCK != 1:
+        # Countdown with number in circle like a movie
+            for i in range(3, 0, -1):
+                circle = visual.Circle(win, radius=10, fillColor='white', lineColor='white', units='deg')
+                circle.draw()
+                countdown_text = visual.TextStim(win, text=str(i), color='black', height=5.5, pos=(0, 0), units='deg', bold=True)
+                countdown_text.draw()
+                win.flip()
+                core.wait(1)
+            
     # Iteration for the mini-blocks
     for group_idx in range(num_groups):
         
@@ -202,7 +223,6 @@ for BLOCK in block:
         cue_stimulus = presenter.get_cue_stimulus(stimuli, cueid)
         cue_trigger_code = presenter.get_cue_trigger_code(cueid)
         presenter.present_cue(cue_stimulus, trigger_code=cue_trigger_code, device=device)  # This function now handles both the trigger and the timing of the cue presentation
-        
 
         # Show fixation. Jitter between 1400-1600ms
         jitter = np.random.choice(np.arange(1.4, 1.61, 0.01))
@@ -275,7 +295,7 @@ for BLOCK in block:
                     # if key_pressed == "white":  # exit button can be reomeved if not desired to allow exit 
                     #     cleanup_and_exit(device, win)
                     # break
-      
+            
             # Show fixation
             stimuli['Fix_Dot'].draw()
             win.callOnFlip(timer.reset)  # Mark fixation onset time
@@ -401,14 +421,6 @@ for BLOCK in block:
         keys = event.getKeys(keyList=['space', 'escape'])
         if 'space' in keys:
             print(f"Starting next block: {BLOCK + 1}")
-            # Countdown with number in circle like a movie
-            for i in range(3, 0, -1):
-                circle = visual.Circle(win, radius=10, fillColor='white', lineColor='white', units='deg')
-                circle.draw()
-                countdown_text = visual.TextStim(win, text=str(i), color='black', height=5.5, pos=(0, 0), units='deg', bold=True)
-                countdown_text.draw()
-                win.flip()
-                core.wait(1)
             break
         elif 'escape' in keys:
             cleanup_and_exit(device, win)

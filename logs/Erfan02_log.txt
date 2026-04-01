@@ -1,24 +1,7 @@
-Running participant: Erfan02
-Starting Block 1...
-Video line value: 10
-Video line value: 200
-Video line value: 130
-Video line value: 3
-Video line value: 140
-Video line value: 3
-Video line value: 150
-Video line value: 3
-Video line value: 160
-Video line value: 3
-Video line value: 175
-Video line value: 3
-Video line value: 10
 Traceback (most recent call last):
-  File "C:\Users\barada01\Documents\paradigm\BI exp\BI-task-switch\psychopy-PFC\PFCG_PARADIGM\PFCG_paradigm.py", line 199, in <module>
+  File "C:\Users\barada01\Documents\paradigm\BI exp\BI-task-switch\psychopy-PFC\PFCG_PARADIGM\PFCG_paradigm_practice.py", line 157, in <module>
     core.wait(2.5)
   File "C:\Users\barada01\AppData\Local\Programs\PsychoPy\lib\site-packages\psychopy\clock.py", line 593, in wait
     time.sleep(sleepDur)
 KeyboardInterrupt
-6.4137 	WARNING 	psychopy.parallel has been imported but no parallel port driver found. Install either inpout32, inpoutx64 or dlportio
-6.4824 	WARNING 	User requested fullscreen with size [1280  720], but screen is actually [1920, 1080]. Using actual size
 ^C

@@ -2,10 +2,7 @@
     # exception - accuracy text is defined in the experiment since it is updated with each block
 
 import os
-import ctypes
-from psychopy import visual, core, event, monitors, logging, sound
-import numpy as np
-import importlib.util
+from psychopy import visual
 
 # Paths
 cwd_    = os.getcwd()
@@ -13,7 +10,7 @@ stimwd  = os.path.join(cwd_, 'stimuli')
 datawd  = os.path.join(cwd_, 'data')
 
 
-def preload_stimuli(win, stimuliwd, subjdir, DE=True):
+def preload_stimuli(win, stimuliwd, DE=True):
     # Grating image
     right_grating = [
         visual.ImageStim(win, image=os.path.join(stimuliwd, 'grating_right', f'right_1.png'), 
@@ -37,23 +34,23 @@ def preload_stimuli(win, stimuliwd, subjdir, DE=True):
     
     welcome_text = visual.TextStim(win, text='Welcome to the experiment! \n\nPress 8 when you are ready to start.', color='white', 
                                 height=1, pos=(0, 0), units='deg', wrapWidth=60)
-    welcome_text_DE = visual.TextStim(win, text='Willkommen zum Experiment! \n\nDrücken Sie den blauen Knopf, wenn Sie bereit sind zu beginnen.', color='white', 
+    welcome_text_DE = visual.TextStim(win, text='Willkommen zum Experiment! \n\nDrücken Sie die blauen Taste, wenn Sie bereit sind zu beginnen.', color='white', 
                                 height=1, pos=(0, 0), units='deg', wrapWidth=60)
 
     welcome_practice = visual.TextStim(win, text='Welcome to the practice blocks of the experiment! \n\nPress 8 when you are ready to start.', color='white', 
                                 height=1, pos=(0, 0), units='deg', wrapWidth=60)
     
-    welcome_practice_DE = visual.TextStim(win, text='Willkommen zu den Übungsblöcken des Experiments! \n\nDrücken Sie den blauen Knopf, wenn Sie bereit sind zu beginnen.', color='white',
+    welcome_practice_DE = visual.TextStim(win, text='Willkommen zu den Übungsblöcken des Experiments! \n\nDrücken Sie die blauen Taste, wenn Sie bereit sind zu beginnen.', color='white',
                                 height=1, pos=(0, 0), units='deg', wrapWidth=60)
 
     RS_text = visual.TextStim(win, text='We begin by taking a resting state OPM. We ask you to look at following fixation, moving as little as possible, for one minute. When you are ready, press the space bar to begin', color='white', 
                             height=1, pos=(0, 0), units='deg', wrapWidth=60)
-    RS_text_DE = visual.TextStim(win, text='Wir beginnen mit einer Ruheaufnahme (OPM). Bitte schauen Sie für eine Minute auf das folgende Fixationskreuz und bewegen Sie sich dabei so wenig wie möglich. Wenn Sie bereit sind, drücken Sie den blauen Knopf, um zu beginnen.', color='white',
+    RS_text_DE = visual.TextStim(win, text='Wir beginnen mit einer Ruheaufnahme (OPM). Bitte schauen Sie für eine Minute auf das folgende Fixationskreuz und bewegen Sie sich dabei so wenig wie möglich. Wenn Sie bereit sind, drücken Sie die blauen Taste, um zu beginnen.', color='white',
                             height=1, pos=(0, 0), units='deg', wrapWidth=60)
 
     begin_text = visual.TextStim(win, text='The task will now begin. \n\nPlease try to respond as accurately as possible. \n\nPress 8 when you are ready to start.', color='white', 
                                 height=1, pos=(0, 0), units='deg', wrapWidth=60)
-    begin_text_DE = visual.TextStim(win, text='Die Aufgabe beginnt jetzt. \n\nBitte versuchen Sie, so genau wie möglich zu antworten. \n\nDrücken Sie den blauen Knopf, wenn Sie bereit sind zu beginnen.', color='white', 
+    begin_text_DE = visual.TextStim(win, text='Die Aufgabe beginnt jetzt. \n\nBitte versuchen Sie, so genau wie möglich zu antworten. \n\nDrücken Sie die blauen Taste, wenn Sie bereit sind zu beginnen.', color='white', 
                                 height=1, pos=(0, 0), units='deg', wrapWidth=60)
                                 
     # instructions
