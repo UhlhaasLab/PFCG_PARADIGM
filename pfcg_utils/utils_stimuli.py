@@ -37,7 +37,7 @@ class StimulusPresenter:
             stimulus.draw()
             self.send_trigger_opm(trigger_code)
             self.win.flip()
-            # core.wait(self.trigger_duration)
+            core.wait(self.trigger_duration)
             print_trigger_info(device)
             stimulus.draw()
             self.win.flip()

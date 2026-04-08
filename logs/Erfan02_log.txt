@@ -1,15 +1,16 @@
 Running participant: Erfan02
 Starting Block 1...
+Video line value: 10
 Video line value: 43690
-Video line value: 43690
-Video line value: 43690
-Video line value: 43690
-Video line value: 43690
-Video line value: 43690
-Video line value: 43690
-Video line value: 43690
+Video line value: 130
+Video line value: 3
+Video line value: 140
+Video line value: 3
+Video line value: 150
+Video line value: 3
+Video line value: 160
 Traceback (most recent call last):
-  File "C:\Users\barada01\Documents\paradigm\BI exp\BI-task-switch\psychopy-PFC\PFCG_PARADIGM\PFCG_paradigm.py", line 284, in <module>
+  File "C:\Users\barada01\Documents\paradigm\BI exp\BI-task-switch\psychopy-PFC\PFCG_PARADIGM\PFCG_paradigm.py", line 311, in <module>
     button_name, timestamp = read_button_press(device, myLog)  # Check for button presses
   File "C:\Users\barada01\Documents\paradigm\BI exp\BI-task-switch\psychopy-PFC\PFCG_PARADIGM\pfcg_utils\utils_bottons.py", line 29, in read_button_press
     device.updateRegisterCache()
@@ -20,5 +21,5 @@ Traceback (most recent call last):
   File "C:\Users\barada01\AppData\Roaming\psychopy3\packages\Python310\site-packages\pypixxlib\_libdpx.py", line 1025, in DPxUpdateRegCache
     _DPxUpdateRegCacheCall()
 KeyboardInterrupt
-3.4084 	WARNING 	User requested fullscreen with size [1280  720], but screen is actually [1920, 1080]. Using actual size
+3.3885 	WARNING 	User requested fullscreen with size [1280  720], but screen is actually [1920, 1080]. Using actual size
 ^C

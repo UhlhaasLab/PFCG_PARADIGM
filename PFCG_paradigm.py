@@ -207,7 +207,7 @@ for BLOCK in block:
         stimuli['cue_baseline'].draw()
         drawPixelModeTrigger(win, Trigger2GB(10)) 
         win.flip()
-        # core.wait(trigger_duration)  # Adjusted to account for time taken by two flips and drawing the cue again
+        core.wait(trigger_duration)  # Adjusted to account for time taken by two flips and drawing the cue again
         print_trigger_info(device) 
         stimuli['cue_baseline'].draw()
         win.flip()
@@ -260,7 +260,7 @@ for BLOCK in block:
   
             win.flip()
 
-            # core.wait(trigger_duration)  # Wait for the duration of the trigger pulse
+            core.wait(trigger_duration)  # Wait for the duration of the trigger pulse
             print_trigger_info(device) # Debugging output to check the video line value and timing of trigger relative to stimulus onset
             # flip just to send trigger for target, then draw the target again for the required duration  
             arrow_stimulus.draw()
@@ -293,7 +293,7 @@ for BLOCK in block:
                     arrow_stimulus.draw()
                     presenter.send_trigger_opm(response_trigger_code)  # send response trigger using pixel mode
                     presenter.win.flip() 
-                    # core.wait(trigger_duration)  # Ensure the trigger is sent immediately
+                    core.wait(trigger_duration)  # Ensure the trigger is sent immediately
                     print_trigger_info(device)  # Debugging output to check the video line value and timing of response trigger
                     # if key_pressed == "white":  # exit button can be reomeved if not desired to allow exit 
                     #     cleanup_and_exit(device, win)
@@ -323,7 +323,7 @@ for BLOCK in block:
                         presenter.send_trigger_opm(response_trigger_code)
                         presenter.win.flip() 
 
-                        # core.wait(trigger_duration)  # Ensure the trigger is sent immediately
+                        core.wait(trigger_duration)  # Ensure the trigger is sent immediately
                         print_trigger_info(device)  # Ensure the trigger is sent immediately
 
                         # if key_pressed == 'white':  # exit button can be reomeved if not desired to allow exit 
