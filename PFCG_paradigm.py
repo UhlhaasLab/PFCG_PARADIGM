@@ -13,7 +13,6 @@ from pfcg_utils.PixelMode import drawPixelModeTrigger, print_trigger_info, Trigg
 from pypixxlib.datapixx import DATAPixx3
 
 
-
 ######### Set directories## ####################################################
 cwd_ = os.getcwd()
 datawd = os.path.join(cwd_, 'data')
@@ -69,17 +68,19 @@ if Testing:   #----------------------> # change to laptop
     monitor_width_cm    = 52.7
     monitor_size_pix    = [1280,720]
     monitor_name        = "testMonitor"
-    screen_num = 0  # Change this to the appropriate screen number for the testing setup
+    monitor_rr = 60
+    screen_num = 1  # Change this to the appropriate screen number for the testing setup
     
 else:   #----------------------> # change OPM/EEG lab port settings
     viewing_distance_cm = viewing_distance_cm if args.viewing_distance else 90
     monitor_width_cm    = 53.7
     monitor_size_pix    = [1920, 1080]
     monitor_name        = "OPM-lab"
+    monitor_rr = 120
     screen_num = 2  # Change this to the appropriate screen number for the OPM lab setup
     
 
-trigger_duration = 0.03  # Duration of trigger pulse in seconds
+trigger_duration = 1/monitor_rr  # Duration of trigger pulse in seconds
 
 # Apply Monitor Settings
 monitor = monitors.Monitor(monitor_name)
@@ -132,7 +133,7 @@ for BLOCK in block:
     # Display instruction to be steady
     instruction_text = visual.TextStim(
         win,
-        text="Bitte bleiben Sie ruhig und bewegen Sie sich während der Aufgabe nicht.",
+        text="Entspannen Sie sich und bewegen Sie sich während der Aufgabe nicht.",
         color='white',
         height=1,
         pos=(0, 0),
@@ -141,7 +142,6 @@ for BLOCK in block:
     )
     instruction_text.draw()
     win.flip()
-    event.clearEvents()
     while True:
         keys = event.getKeys(keyList=['space', 'escape'])
         if 'space' in keys:
@@ -207,7 +207,7 @@ for BLOCK in block:
         stimuli['cue_baseline'].draw()
         drawPixelModeTrigger(win, Trigger2GB(10)) 
         win.flip()
-        core.wait(trigger_duration)  # Adjusted to account for time taken by two flips and drawing the cue again
+        # core.wait(trigger_duration)  # Adjusted to account for time taken by two flips and drawing the cue again
         print_trigger_info(device) 
         stimuli['cue_baseline'].draw()
         win.flip()
@@ -256,14 +256,17 @@ for BLOCK in block:
             device.updateRegisterCache()
             win.callOnFlip(lambda: flip_marks.setdefault('t0_dev', device.getTime()))
             win.callOnFlip(timer.reset)
+            # win.callOnFlip(lambda: print(f"Flip time (timer): {timer.getTime()}"))
+  
             win.flip()
 
-            core.wait(trigger_duration)  # Wait for the duration of the trigger pulse
+            # core.wait(trigger_duration)  # Wait for the duration of the trigger pulse
             print_trigger_info(device) # Debugging output to check the video line value and timing of trigger relative to stimulus onset
             # flip just to send trigger for target, then draw the target again for the required duration  
             arrow_stimulus.draw()
+            # win.callOnFlip(lambda: print(f"Flip time (timer): {timer.getTime()}"))
             win.flip()
-            
+
             # Initialize response variables
             t_0_v = flip_marks['t0_dev']
             button_name = None
@@ -271,13 +274,12 @@ for BLOCK in block:
             reaction_time = None
             reaction_time_vpixx = None
             arrow_duration = 0.5
-            response_deadline = arrow_duration + jitter
+            # response_deadline = arrow_duration + jitter
 
             flush_button_buffer(device, myLog)  # Clear any old button presses from the buffer
             
             # Monitor for responses during target presentation (0.5s)
             while timer.getTime() < arrow_duration:
-                # keys = event.getKeys(keyList=['num_7', 'num_9', 'escape'])
 
                 button_name, timestamp = read_button_press(device, myLog)  # Check for button presses
                 if button_name is not None:
@@ -287,10 +289,11 @@ for BLOCK in block:
                     reaction_time_vpixx = timestamp - t_0_v  # Calculate reaction time based on VPixx timestamp
 
                     response_trigger_code = presenter.get_response_trigger_code(key_pressed)
+                    
                     arrow_stimulus.draw()
                     presenter.send_trigger_opm(response_trigger_code)  # send response trigger using pixel mode
                     presenter.win.flip() 
-                    core.wait(trigger_duration)  # Ensure the trigger is sent immediately
+                    # core.wait(trigger_duration)  # Ensure the trigger is sent immediately
                     print_trigger_info(device)  # Debugging output to check the video line value and timing of response trigger
                     # if key_pressed == "white":  # exit button can be reomeved if not desired to allow exit 
                     #     cleanup_and_exit(device, win)
@@ -313,12 +316,14 @@ for BLOCK in block:
                         # RT during fixation = 0.5 + time into fixation
                         reaction_time = arrow_duration + timer.getTime()
                         reaction_time_vpixx = timestamp - t_0_v  # Calculate reaction time based on VPixx timestamp
+                        
                         response_trigger_code = presenter.get_response_trigger_code(key_pressed)
+
                         stimuli['Fix_Dot'].draw()
                         presenter.send_trigger_opm(response_trigger_code)
                         presenter.win.flip() 
 
-                        core.wait(trigger_duration)  # Ensure the trigger is sent immediately
+                        # core.wait(trigger_duration)  # Ensure the trigger is sent immediately
                         print_trigger_info(device)  # Ensure the trigger is sent immediately
 
                         # if key_pressed == 'white':  # exit button can be reomeved if not desired to allow exit 
@@ -403,7 +408,7 @@ for BLOCK in block:
     )
     accuracy_text_DE = visual.TextStim(
         win,
-        text=f'Block {BLOCK}/10 ist jetzt abgeschlossen. \n\nSie waren auf {accuracy_percentage:.1f}% der Versuche korrekt.\n\nVielen Dank für Ihre Teilnahme! \n\n Wir werden jetzt eine kurze Pause einlegen, bevor der nächste Block beginnt.',
+        text=f'Block {BLOCK}/10 ist jetzt abgeschlossen. \n\nIhre Antworten waren zu {accuracy_percentage:.1f}% richtig.\n\nVielen Dank für Ihre Teilnahme! \n\n Wir werden jetzt eine kurze Pause einlegen, bevor der nächste Block beginnt.',
         color='white',
         height=1,
         pos=(0, 0),

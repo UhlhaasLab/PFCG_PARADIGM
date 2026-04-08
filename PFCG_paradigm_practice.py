@@ -7,11 +7,11 @@ import numpy as np
 from psychopy import core, visual, event, monitors
 
 from PFCG_cfg import stimwd, datawd, preload_stimuli
-from pfcg_utils.utils_bottons import flush_button_buffer,cleanup_and_exit, read_button_press, stopButtons
+from pfcg_utils.utils_bottons import flush_button_buffer, read_button_press
 from pfcg_utils.utils_stimuli import StimulusPresenter
 from pfcg_utils.utils_trials import get_block_trialtypes, get_block_cuetypes
 # from pfcg_utils.buttons import collect_response, flush_buttons
-from pfcg_utils.PixelMode import drawPixelModeTrigger,  print_trigger_info, GB2trigger, Trigger2GB
+# from pfcg_utils.PixelMode import drawPixelModeTrigger,  print_trigger_info, GB2trigger, Trigger2GB
 from pypixxlib.datapixx import DATAPixx3
 
 
@@ -216,7 +216,7 @@ for group_idx in range(num_groups):
                 reaction_time = timer.getTime()
                 reaction_time_vpixx = timestamp - t_0_v  # Calculate reaction time based on VPixx timestamp
 
-                response_trigger_code = presenter.get_response_trigger_code(key_pressed)
+                # response_trigger_code = presenter.get_response_trigger_code(key_pressed)
                 # presenter.send_trigger_opm(response_trigger_code)  # send response trigger using pixel mode
                 # presenter.win.flip()  # Ensure the trigger is sent immediately
 
@@ -235,7 +235,7 @@ for group_idx in range(num_groups):
                     # RT during fixation = 0.5 + time into fixation
                     reaction_time = arrow_duration + timer.getTime()
                     reaction_time_vpixx = timestamp - t_0_v  # Calculate reaction time based on VPixx timestamp
-                    response_trigger_code = presenter.get_response_trigger_code(key_pressed)
+                    # response_trigger_code = presenter.get_response_trigger_code(key_pressed)
                     # presenter.send_trigger_opm(response_trigger_code)
                     # presenter.win.flip()  # Ensure the trigger is sent immediately
 
@@ -323,7 +323,7 @@ if total_trials > 0:
 else:
     accuracy_percentage = 0
 
-text_DE=f'Übung abgeschlossen!\n\nSie waren bei {accuracy_percentage:.1f}% der Versuche korrekt.\n\nDrücken Sie den weißen Knopf, um fortzufahren.'
+text_DE=f'Übung abgeschlossen!\n\nSie waren bei {accuracy_percentage:.1f}% der Versuche korrekt.\n\nDrücken Sie den blauen Knopf, um fortzufahren.'
 
 # Create accuracy feedback text
 accuracy_text = visual.TextStim(
