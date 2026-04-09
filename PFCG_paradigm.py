@@ -9,7 +9,7 @@ from PFCG_cfg import stimwd, datawd, preload_stimuli
 from pfcg_utils.utils_bottons import flush_button_buffer,cleanup_and_exit, read_button_press
 from pfcg_utils.utils_stimuli import StimulusPresenter
 from pfcg_utils.utils_trials import get_block_trialtypes, get_block_cuetypes, shuffle_blocks
-from pfcg_utils.PixelMode import drawPixelModeTrigger, print_trigger_info, Trigger2GB
+from pfcg_utils.PixelMode import drawPixelModeTrigger, print_trigger_info, Trigger2GB, sec_to_fr
 from pypixxlib.datapixx import DATAPixx3
 
 
@@ -80,7 +80,7 @@ else:   #----------------------> # change OPM/EEG lab port settings
     screen_num = 2  # Change this to the appropriate screen number for the OPM lab setup
     
 
-trigger_duration = 1/monitor_rr  # Duration of trigger pulse in seconds
+trigger_duration = 2/monitor_rr  # Duration of trigger pulse in seconds
 
 # Apply Monitor Settings
 monitor = monitors.Monitor(monitor_name)
@@ -238,45 +238,39 @@ for BLOCK in block:
             jitter = np.random.choice(np.arange(1.4, 1.61, 0.01))
             jitter = round(jitter, 2)
             
-            arrow_stimulus.draw()
-            # Send trigger at Flip
-            if target_trigger_code is not None:
-                drawPixelModeTrigger(win, Trigger2GB(target_trigger_code))  # send trigger using pixel mode
-
             timer = core.Clock()
             flip_marks = {}
             device.updateRegisterCache()
             win.callOnFlip(lambda: flip_marks.setdefault('t0_dev', device.getTime()))
             win.callOnFlip(timer.reset)
-            # win.callOnFlip(lambda: print(f"Flip time (timer): {timer.getTime()}"))
-  
-            win.flip()
-
-            core.wait(trigger_duration)  # Wait for the duration of the trigger pulse
-            print_trigger_info(device) # Debugging output to check the video line value and timing of trigger relative to stimulus onset
-            # flip just to send trigger for target, then draw the target again for the required duration  
-            arrow_stimulus.draw()
-            # win.callOnFlip(lambda: print(f"Flip time (timer): {timer.getTime()}"))
-            win.flip()
-
-            # Initialize response variables
-            t_0_v = flip_marks['t0_dev']
+             # Initialize response variables
+           
             button_name = None
             key_pressed = None
             reaction_time = None
             reaction_time_vpixx = None
             arrow_duration = 0.5
             # response_deadline = arrow_duration + jitter
+            key_press_frame = None
 
-            flush_button_buffer(device, myLog)  # Clear any old button presses from the buffer
-            
-            # Monitor for responses during target presentation (0.5s)
-            while timer.getTime() < arrow_duration:
+            for frames in range(sec_to_fr(arrow_duration, monitor_rr)):  # Show target for 0.5s
 
                 button_name, timestamp = read_button_press(device, myLog)  # Check for button presses
-                if button_name is not None:
+               
+
+                # Send trigger at Flip
+                if frames < 2:  # Only send trigger for two frame and if no response yet
+                    arrow_stimulus.draw()
+                    drawPixelModeTrigger(win, Trigger2GB(target_trigger_code))
+                    win.flip()
+                    t_0_v = flip_marks['t0_dev']  # send trigger using pixel mode                   
+                    print_trigger_info(device) # Debugging output to check the video line value and timing of trigger relative to stimulus onset
+                
+                elif button_name is not None: 
+
                     key_pressed = button_name
-                    # print(f"Button pressed: {key_pressed}")  # Debugging output for button presses and timestamps
+                    key_press_frame = frames
+
                     reaction_time = timer.getTime()
                     reaction_time_vpixx = timestamp - t_0_v  # Calculate reaction time based on VPixx timestamp
 
@@ -285,24 +279,35 @@ for BLOCK in block:
                     arrow_stimulus.draw()
                     presenter.send_trigger_opm(response_trigger_code)  # send response trigger using pixel mode
                     presenter.win.flip() 
-                    core.wait(trigger_duration)  # Ensure the trigger is sent immediately
+                    # core.wait(trigger_duration)  # Ensure the trigger is sent immediately
+                    # print_trigger_info(device)  # Debugging output to check the video line value and timing of response trigger
+                    flush_button_buffer(device, myLog)  # Clear any old button presses from the buffer
+                elif key_press_frame:
+                    arrow_stimulus.draw()
+                    presenter.send_trigger_opm(response_trigger_code)  # send response trigger using pixel mode
+                    presenter.win.flip() # Response already given during target, just wait the full jitter duration
                     print_trigger_info(device)  # Debugging output to check the video line value and timing of response trigger
-                    # if key_pressed == "white":  # exit button can be reomeved if not desired to allow exit 
-                    #     cleanup_and_exit(device, win)
-                    # break
-            
+                    key_press_frame = None
+                else:
+                    arrow_stimulus.draw()
+                    # if frames == sec_to_fr(arrow_duration, monitor_rr) - 1:  # On the last frame of the target presentation, print the timing information
+                        # win.callOnFlip(lambda: print(timer.getTime(), "seconds since target onset (should be close to 0.5s)"))  # Debugging output to check timing of target presentation
+                    win.flip()
+                    
+                
             # Show fixation
             stimuli['Fix_Dot'].draw()
             win.callOnFlip(timer.reset)  # Mark fixation onset time
             win.flip()
 
             # Continue monitoring during fixation if no response yet
-            if key_pressed is None:
-                while timer.getTime() < jitter:
+            if button_name is None:
+                for frames in range(sec_to_fr(jitter, monitor_rr)-1):
                     # flush_button_buffer(device, myLog)  # Clear any old button presses from the buffer
                     button_name, timestamp = read_button_press(device, myLog)  # Check for button presses
                     if button_name is not None:
                         key_pressed = button_name
+                        key_press_frame = frames
                         # print("pressed during fixation")  # Debugging output to indicate response during fixation
                         # print(f"Button pressed: {key_pressed}")  # Debugging output for button presses and timestamps
                         # RT during fixation = 0.5 + time into fixation
@@ -315,21 +320,26 @@ for BLOCK in block:
                         presenter.send_trigger_opm(response_trigger_code)
                         presenter.win.flip() 
 
-                        core.wait(trigger_duration)  # Ensure the trigger is sent immediately
-                        print_trigger_info(device)  # Ensure the trigger is sent immediately
-
-                        # if key_pressed == 'white':  # exit button can be reomeved if not desired to allow exit 
-                        #     cleanup_and_exit(device, win)
-                        # break
+                        # print_trigger_info(device)  # Ensure the trigger is sent immediately
+                    elif key_press_frame:
+                        stimuli['Fix_Dot'].draw()
+                        presenter.send_trigger_opm(response_trigger_code)  # send response trigger using pixel mode
+                        presenter.win.flip() # Response already given during target, just wait the full jitter duration
+                        print_trigger_info(device)  
+                        key_press_frame = None  # Debugging output to check the video line value and timing of response trigger
+                    else:
+                        stimuli['Fix_Dot'].draw()
+                        win.flip()
 
                 # Wait for any remaining fixation time
-                remaining_time = jitter - timer.getTime()
-                if remaining_time > 0:
-                    core.wait(remaining_time)
+                # remaining_time = jitter - timer.getTime()
+                # if remaining_time > 0:
+                #     core.wait(remaining_time)
                     
             else:
-                # Response already given during target, just wait the full jitter duration
-                core.wait(jitter)
+                for frames in range(sec_to_fr(jitter, monitor_rr)-1):
+                    stimuli['Fix_Dot'].draw()
+                    win.flip()
                 
             # Determine trial info for CSV
             correct_key = ''
