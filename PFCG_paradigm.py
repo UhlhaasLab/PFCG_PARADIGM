@@ -69,7 +69,7 @@ if Testing:   #----------------------> # change to laptop
     monitor_size_pix    = [1280,720]
     monitor_name        = "testMonitor"
     monitor_rr = 60
-    screen_num = 1  # Change this to the appropriate screen number for the testing setup
+    screen_num = 0  # Change this to the appropriate screen number for the testing setup
     
 else:   #----------------------> # change OPM/EEG lab port settings
     viewing_distance_cm = viewing_distance_cm if args.viewing_distance else 90
@@ -197,13 +197,6 @@ for BLOCK in block:
                 core.wait(1)
         
         # Task begins here for each mini-block
-
-        
-        # Show baseline cue for 500ms
-        #devide the 500 ms into 2 parts, first flip with pixel mode trigger to send the trigger for baseline cue, 
-        # then draw the cue again for the required duration adjust the core.wait() duration to account for the time taken by the first flip and drawing the cue again,
-        #  so that the total duration of the baseline cue presentation remains 500 ms
-
         stimuli['cue_baseline'].draw()
         drawPixelModeTrigger(win, Trigger2GB(10)) 
         win.flip()
@@ -212,9 +205,8 @@ for BLOCK in block:
         stimuli['cue_baseline'].draw()
         win.flip()
         core.wait(0.5 - trigger_duration)  # Adjusted to account for time taken by two flips and drawing the cue again
-        # Debugging output to check the video line value
-        
-        # Show fixation for 2500ms
+
+        # Show fixation for 2500m
         stimuli['Fix_Dot'].draw()
         win.flip()
         core.wait(2.5)
