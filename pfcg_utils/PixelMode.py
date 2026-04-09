@@ -1,4 +1,5 @@
 from psychopy import visual
+import numpy as np
 
 def sec_to_fr(dur_s, rrate):
     # Seconds to frames
