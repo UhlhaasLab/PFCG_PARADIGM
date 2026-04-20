@@ -39,6 +39,7 @@ if TestingPort:
     monitor_width_cm    = 52.7
     monitor_size_pix    = [1280,720]
     monitor_name        = "testMonitor"
+    monitor_rr = 60
     screen_num = 0  # Change this to the appropriate screen number for the testing setup
     
 else:   #----------------------> # change OPM/EEG lab port settings
@@ -46,6 +47,7 @@ else:   #----------------------> # change OPM/EEG lab port settings
     monitor_width_cm    = 53.7
     monitor_size_pix    = [1920, 1080]
     monitor_name        = "OPM-lab"
+    monitor_rr = 120
     screen_num = 2  # Change this to the appropriate screen number for the OPM lab setup
     
 """ change the else loop if in EEG Lab Suedring to:
@@ -159,12 +161,12 @@ for group_idx in range(num_groups):
     # Show cue_cong or cue_incg for 500ms
     cue_stimulus = presenter.get_cue_stimulus(stimuli, cueid)
     cue_trigger_code = presenter.get_cue_trigger_code(cueid)
-    presenter.present_cue(cue_stimulus)
+    presenter.present_cue(cue_stimulus, trigger_code=cue_trigger_code, frame_rate=monitor_rr, device=device)
 
     # Show fixation. Jitter between 1400-1600ms
     jitter = np.random.choice(np.arange(1.4, 1.61, 0.01))
     jitter = round(jitter, 2)
-    post_cue_jitter = presenter.present_fixation(stimuli['Fix_Dot'], duration=jitter)
+    post_cue_jitter = presenter.present_fixation(stimuli['Fix_Dot'], duration=jitter, frame_rate=monitor_rr)
 
     # Present 5 trials
     for trial_idx in range(start_idx, end_idx):

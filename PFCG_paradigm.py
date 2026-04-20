@@ -61,7 +61,7 @@ flush_button_buffer(device, myLog)
 
 
 # ==================== MONITOR ==================== #
-Testing = True      # True if on a laptop. 
+Testing = False      # True if on a laptop. 
 
 if Testing:   #----------------------> # change to laptop 
     viewing_distance_cm = 57.3   
@@ -197,30 +197,38 @@ for BLOCK in block:
                 core.wait(1)
         
         # Task begins here for each mini-block
-        stimuli['cue_baseline'].draw()
-        drawPixelModeTrigger(win, Trigger2GB(10)) 
-        win.flip()
-        core.wait(trigger_duration)  # Adjusted to account for time taken by two flips and drawing the cue again
-        print_trigger_info(device) 
-        stimuli['cue_baseline'].draw()
-        win.flip()
-        core.wait(0.5 - trigger_duration)  # Adjusted to account for time taken by two flips and drawing the cue again
+        baseline_trigger_code = 10
+        baseline_duration = 0.5
+        fixation_duration = 2.5
+
+        for frame in range(sec_to_fr(baseline_duration, monitor_rr)):
+            if frame < 2:  # Only send trigger for two frames
+                stimuli['cue_baseline'].draw()
+                drawPixelModeTrigger(win, Trigger2GB(10)) 
+                win.flip()
+            # core.wait(trigger_duration)  # Adjusted to account for time taken by two flips and drawing the cue again
+            else:
+                # print_trigger_info(device) 
+                stimuli['cue_baseline'].draw()
+                win.flip()
+            # core.wait(0.5 - trigger_duration)  # Adjusted to account for time taken by two flips and drawing the cue again
 
         # Show fixation for 2500m
-        stimuli['Fix_Dot'].draw()
-        win.flip()
-        core.wait(2.5)
+        for frame in range(sec_to_fr(fixation_duration, monitor_rr)):
+            stimuli['Fix_Dot'].draw()
+            win.flip()
+        # core.wait(2.5)
     
         # Show cue_cong or cue_incg for 500ms
         cue_stimulus = presenter.get_cue_stimulus(stimuli, cueid)
         cue_trigger_code = presenter.get_cue_trigger_code(cueid)
-        presenter.present_cue(cue_stimulus, trigger_code=cue_trigger_code, device=device)  # This function now handles both the trigger and the timing of the cue presentation
+        presenter.present_cue(cue_stimulus, trigger_code=cue_trigger_code, frame_rate=monitor_rr, device=device)  # This function now handles both the trigger and the timing of the cue presentation
 
         # Show fixation. Jitter between 1400-1600ms
         jitter = np.random.choice(np.arange(1.4, 1.61, 0.01))
         jitter = round(jitter, 2)
     
-        post_cue_jitter = presenter.present_fixation(stimuli['Fix_Dot'], duration=jitter)
+        post_cue_jitter = presenter.present_fixation(stimuli['Fix_Dot'], duration=jitter, frame_rate=monitor_rr)
 
         # Present 5 trials of gratings
         # start_idx and end_idx calling the appropriate row in the data (AKA conditions) file
@@ -255,6 +263,9 @@ for BLOCK in block:
 
             for frames in range(sec_to_fr(arrow_duration, monitor_rr)):  # Show target for 0.5s
 
+                # print(f"Frame: {frames}")  # Debugging output to track frame number
+                # print_trigger_info(device)
+
                 button_name, timestamp = read_button_press(device, myLog)  # Check for button presses
                
 
@@ -264,7 +275,7 @@ for BLOCK in block:
                     drawPixelModeTrigger(win, Trigger2GB(target_trigger_code))
                     win.flip()
                     t_0_v = flip_marks['t0_dev']  # send trigger using pixel mode                   
-                    print_trigger_info(device) # Debugging output to check the video line value and timing of trigger relative to stimulus onset
+                    # print_trigger_info(device) # Debugging output to check the video line value and timing of trigger relative to stimulus onset
                 
                 elif button_name is not None: 
 
@@ -281,12 +292,12 @@ for BLOCK in block:
                     presenter.win.flip() 
                     # core.wait(trigger_duration)  # Ensure the trigger is sent immediately
                     # print_trigger_info(device)  # Debugging output to check the video line value and timing of response trigger
-                    flush_button_buffer(device, myLog)  # Clear any old button presses from the buffer
+                    # flush_button_buffer(device, myLog)  # Clear any old button presses from the buffer
                 elif key_press_frame:
                     arrow_stimulus.draw()
                     presenter.send_trigger_opm(response_trigger_code)  # send response trigger using pixel mode
                     presenter.win.flip() # Response already given during target, just wait the full jitter duration
-                    print_trigger_info(device)  # Debugging output to check the video line value and timing of response trigger
+                    # print_trigger_info(device)  # Debugging output to check the video line value and timing of response trigger
                     key_press_frame = None
                 else:
                     arrow_stimulus.draw()
@@ -304,7 +315,11 @@ for BLOCK in block:
             if button_name is None:
                 for frames in range(sec_to_fr(jitter, monitor_rr)-1):
                     # flush_button_buffer(device, myLog)  # Clear any old button presses from the buffer
+                    # print(f"Fixation Frame: {frames}")  # Debugging output to track frame number during fixation
+                    # print_trigger_info(device)
+
                     button_name, timestamp = read_button_press(device, myLog)  # Check for button presses
+                    
                     if button_name is not None:
                         key_pressed = button_name
                         key_press_frame = frames
@@ -325,7 +340,7 @@ for BLOCK in block:
                         stimuli['Fix_Dot'].draw()
                         presenter.send_trigger_opm(response_trigger_code)  # send response trigger using pixel mode
                         presenter.win.flip() # Response already given during target, just wait the full jitter duration
-                        print_trigger_info(device)  
+                        # print_trigger_info(device)  
                         key_press_frame = None  # Debugging output to check the video line value and timing of response trigger
                     else:
                         stimuli['Fix_Dot'].draw()
@@ -375,7 +390,7 @@ for BLOCK in block:
             reaction_time = round(reaction_time, 4) if reaction_time is not None else None
             reaction_time_vpixx = round(reaction_time_vpixx, 4) if reaction_time_vpixx is not None else None
             # Write to CSV
-            # print(f"key_pressed: {key_pressed}")
+            print(f"Block: {block_num}, Trial: {trial_num} pressed: {key_pressed}, {'CORRECT' if is_resp_corr == 1 else 'INCORRECT'}")
             with open(datafile_path, 'a', newline='') as f:
                 writer = csv.writer(f)
                 writer.writerow([

@@ -30,35 +30,39 @@ class StimulusPresenter:
         drawPixelModeTrigger(self.win, Trigger2GB(code))
         # self.win.flip()
 
-    def present_stimulus(self, stimulus, duration, trigger_code=None, device=None):
+    def present_stimulus(self, stimulus, duration, trigger_code=None, frame_rate=None, device=None):
         """Present a single stimulus for a specified duration"""
         
         if trigger_code is not None:
-            stimulus.draw()
-            self.send_trigger_opm(trigger_code)
-            self.win.flip()
-            core.wait(self.trigger_duration)
-            print_trigger_info(device)
-            stimulus.draw()
-            self.win.flip()
-            core.wait(duration - self.trigger_duration)
+            for frame in range(sec_to_fr(duration, frame_rate)):
+                if frame < 2:  # Only send trigger for two frames
+                    stimulus.draw()
+                    self.send_trigger_opm(trigger_code)
+                    self.win.flip()
+            # core.wait(self.trigger_duration)
+            # print_trigger_info(device)
+                else:
+                    stimulus.draw()
+                    self.win.flip()
+            # core.wait(duration - self.trigger_duration)
         else:
-            stimulus.draw()
-            self.win.flip()
-            core.wait(duration)
+            for frame in range(sec_to_fr(duration, frame_rate)):
+                stimulus.draw()
+                self.win.flip()
+            # core.wait(duration)
 
     def present_RS(self, resting_state, duration=60, trigger_code=7):
         """Present fixation dot for resting state measurement"""
         self.present_stimulus(resting_state, duration, trigger_code)
 
-    def present_fixation(self, fixation, duration=None, trigger_code=None):
+    def present_fixation(self, fixation, duration=None, trigger_code=None, frame_rate=None):
         """Present fixation dot for specified duration"""
-        self.present_stimulus(fixation, duration, trigger_code)
+        self.present_stimulus(fixation, duration, trigger_code, frame_rate)
         return duration
 
-    def present_cue(self, cue_stimulus, duration=0.5, trigger_code=None, device=None):
+    def present_cue(self, cue_stimulus, duration=0.5, trigger_code=None, frame_rate=None, device=None):
         """Present congruent or incongruent cue"""
-        self.present_stimulus(cue_stimulus, duration, trigger_code, device)
+        self.present_stimulus(cue_stimulus, duration, trigger_code, frame_rate, device)
 
     def target_type(self, stimuli, trialid):
         """Get the appropriate arrow stimulus based on trial type"""
